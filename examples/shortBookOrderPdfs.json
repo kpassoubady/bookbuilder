@@ -1,6 +1,14 @@
 {
   "bookTitle": "GitHub Copilot - 1 Day Course Guide",
   "outputFilename": "Copilot-1Day-Course-Guide.pdf",
+  "pageSettings": {
+    "header": "{title}",
+    "headerFallback": "{bookTitle}",
+    "footerLeft": "{date}",
+    "footerCenter": "Page {page} of {pages}",
+    "footerRight": "Kangs | Kavin School",
+    "dateFormat": "%B %d, %Y"
+  },
   "chapters": [
     {
       "section": "Front Cover",

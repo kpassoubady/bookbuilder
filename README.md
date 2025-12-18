@@ -69,6 +69,14 @@ Create a JSON file that defines your book structure:
 {
   "bookTitle": "My Book Title",
   "outputFilename": "my-book.pdf",
+  "pageSettings": {
+    "header": "{title}",
+    "headerFallback": "{bookTitle}",
+    "footerLeft": "{date}",
+    "footerCenter": "Page {page} of {pages}",
+    "footerRight": "Kangs | Kavin School",
+    "dateFormat": "%B %d, %Y"
+  },
   "chapters": [
     {
       "section": "Front Cover",
@@ -95,6 +103,30 @@ Create a JSON file that defines your book structure:
   ]
 }
 ```
+
+### Page Settings
+
+Configure dynamic headers and footers using the `pageSettings` object:
+
+| Setting | Description | Default |
+|---------|-------------|---------|
+| `header` | Page header text with placeholders | `{title}` |
+| `headerFallback` | Fallback if title not found | `Document` |
+| `footerLeft` | Left footer text | `{date}` |
+| `footerCenter` | Center footer text | `Page {page} of {pages}` |
+| `footerRight` | Right footer text | `Kangs \| Kavin School` |
+| `dateFormat` | Python strftime format | `%B %d, %Y` |
+
+**Supported Placeholders:**
+
+| Placeholder | Description |
+|-------------|-------------|
+| `{title}` | First H1 heading from the markdown file |
+| `{filename}` | Name of the source file |
+| `{date}` | Current date (formatted per `dateFormat`) |
+| `{page}` | Current page number |
+| `{pages}` | Total page count |
+| `{bookTitle}` | Book title from JSON |
 
 ### File References
 

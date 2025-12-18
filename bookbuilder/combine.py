@@ -331,6 +331,11 @@ def build_book(
     book_title = order_json.get('bookTitle', 'Copilot Training Book')
     chapters = order_json.get('chapters', [])
     
+    # Get page settings from JSON (header/footer configuration)
+    page_settings = order_json.get('pageSettings', {})
+    # Add bookTitle to page_settings so it can be used as a placeholder
+    page_settings['bookTitle'] = book_title
+    
     # Get output filename from JSON if not provided via CLI
     if output_filename is None:
         output_filename = order_json.get('outputFilename', 'Copilot-Training-Book.pdf')
@@ -378,7 +383,8 @@ def build_book(
             root_dir,
             output_dir,
             force,
-            verbose
+            verbose,
+            page_settings=page_settings
         )
         
         if verbose:

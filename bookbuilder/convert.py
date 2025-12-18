@@ -6,9 +6,11 @@ Features:
 - Timestamp-based caching (skips if PDF is newer than MD)
 - Parallel conversion for speed
 - Lazy conversion (only converts files needed for the book)
+- Dynamic headers/footers with placeholder support
 """
 
 import os
+import re
 import datetime
 import markdown
 from weasyprint import HTML
@@ -20,13 +22,118 @@ from .utils import (
     ensure_dir
 )
 
-# Default header/footer configuration
-DEFAULT_HEADER_TEXT = "GitHub Copilot Training Material"
-DEFAULT_FOOTER_LEFT = datetime.date.today().strftime("%B %d, %Y")
-DEFAULT_FOOTER_RIGHT = "Kangeyan Passoubady | Kangs | Kavin School"
+# Default page settings configuration
+DEFAULT_PAGE_SETTINGS = {
+    'header': '{title}',
+    'headerFallback': 'Document',
+    'footerLeft': '{date}',
+    'footerCenter': 'Page {page} of {pages}',
+    'footerRight': 'Kangs | Kavin School',
+    'dateFormat': '%B %d, %Y'
+}
 
-# WeasyPrint is NOT thread-safe, so we use sequential conversion
-# See: https://github.com/Kozea/WeasyPrint/issues/677
+
+def extract_title_from_markdown(md_content: str) -> str:
+    """
+    Extract the first H1 heading from markdown content.
+    
+    Args:
+        md_content: Raw markdown content
+        
+    Returns:
+        The title text, or None if no H1 found
+    """
+    # Try to find # heading (ATX style)
+    match = re.search(r'^#\s+(.+?)\s*$', md_content, re.MULTILINE)
+    if match:
+        return match.group(1).strip()
+    
+    # Try to find underlined heading (Setext style)
+    match = re.search(r'^(.+?)\n=+\s*$', md_content, re.MULTILINE)
+    if match:
+        return match.group(1).strip()
+    
+    return None
+
+
+def process_placeholder(text: str, context: dict) -> str:
+    """
+    Replace placeholders in text with actual values.
+    
+    Supported placeholders:
+    - {title}: First H1 from markdown file
+    - {filename}: Name of the source file
+    - {date}: Current date (format from dateFormat setting)
+    - {page}: Current page number (CSS counter)
+    - {pages}: Total page count (CSS counter)
+    - {bookTitle}: Book title from JSON
+    
+    Args:
+        text: Text containing placeholders
+        context: Dictionary with values for placeholders
+        
+    Returns:
+        Text with placeholders replaced
+    """
+    if not text:
+        return ''
+    
+    # Replace simple placeholders
+    result = text
+    for key, value in context.items():
+        if key not in ('page', 'pages'):  # These are CSS counters
+            placeholder = '{' + key + '}'
+            if value is not None:
+                result = result.replace(placeholder, str(value))
+    
+    return result
+
+
+def build_css_content(text: str) -> str:
+    """
+    Convert placeholder text to CSS content property value.
+    
+    Handles {page} and {pages} as CSS counters.
+    
+    Args:
+        text: Text with placeholders already processed (except page/pages)
+        
+    Returns:
+        CSS content property value
+    """
+    if not text:
+        return "''"
+    
+    # Check if text contains page placeholders
+    has_page = '{page}' in text
+    has_pages = '{pages}' in text
+    
+    if not has_page and not has_pages:
+        # Simple string, just quote it
+        return f"'{text}'"
+    
+    # Build CSS content with counters
+    parts = []
+    remaining = text
+    
+    while remaining:
+        if '{page}' in remaining:
+            idx = remaining.index('{page}')
+            if idx > 0:
+                parts.append(f"'{remaining[:idx]}'")
+            parts.append('counter(page)')
+            remaining = remaining[idx + 6:]
+        elif '{pages}' in remaining:
+            idx = remaining.index('{pages}')
+            if idx > 0:
+                parts.append(f"'{remaining[:idx]}'")
+            parts.append('counter(pages)')
+            remaining = remaining[idx + 7:]
+        else:
+            parts.append(f"'{remaining}'")
+            remaining = ''
+    
+    return ' '.join(parts)
 
 
 def find_markdown_files(root_dir: str, ignore_patterns: list[str] = None) -> list[str]:
@@ -111,20 +218,23 @@ def is_conversion_needed(md_path: str, pdf_path: str, force: bool = False) -> bo
 def convert_markdown_to_pdf(
     md_path: str, 
     pdf_path: str = None,
-    header_text: str = DEFAULT_HEADER_TEXT,
-    footer_left: str = DEFAULT_FOOTER_LEFT,
-    footer_right: str = DEFAULT_FOOTER_RIGHT,
+    page_settings: dict = None,
     force: bool = False
 ) -> tuple[str, bool]:
     """
-    Convert a markdown file to PDF with header and footer.
+    Convert a markdown file to PDF with dynamic header and footer.
     
     Args:
         md_path: Path to markdown file
         pdf_path: Output PDF path (defaults to output directory with same structure)
-        header_text: Text for page header
-        footer_left: Text for left footer
-        footer_right: Text for right footer
+        page_settings: Dictionary with header/footer configuration
+            - header: Header text with placeholders
+            - headerFallback: Fallback if title not found
+            - footerLeft: Left footer with placeholders
+            - footerCenter: Center footer with placeholders
+            - footerRight: Right footer with placeholders
+            - dateFormat: Date format string (default: %B %d, %Y)
+            - bookTitle: Book title for {bookTitle} placeholder
         force: Force reconversion even if cached
         
     Returns:
@@ -137,11 +247,39 @@ def convert_markdown_to_pdf(
     if not is_conversion_needed(md_path, pdf_path, force):
         return pdf_path, False
     
+    # Merge with defaults
+    settings = {**DEFAULT_PAGE_SETTINGS, **(page_settings or {})}
+    
     # Ensure output directory exists
     ensure_dir(os.path.dirname(pdf_path))
     
     with open(md_path, 'r', encoding='utf-8') as f:
         md_content = f.read()
+    
+    # Extract title from markdown
+    title = extract_title_from_markdown(md_content)
+    if not title:
+        title = settings.get('headerFallback', 'Document')
+    
+    # Build context for placeholder replacement
+    context = {
+        'title': title,
+        'filename': os.path.basename(md_path),
+        'date': datetime.date.today().strftime(settings.get('dateFormat', '%B %d, %Y')),
+        'bookTitle': settings.get('bookTitle', ''),
+    }
+    
+    # Process placeholders for header and footers
+    header_text = process_placeholder(settings.get('header', '{title}'), context)
+    footer_left = process_placeholder(settings.get('footerLeft', ''), context)
+    footer_center = process_placeholder(settings.get('footerCenter', ''), context)
+    footer_right = process_placeholder(settings.get('footerRight', ''), context)
+    
+    # Build CSS content values (handles {page} and {pages} counters)
+    header_css = build_css_content(header_text)
+    footer_left_css = build_css_content(footer_left)
+    footer_center_css = build_css_content(footer_center)
+    footer_right_css = build_css_content(footer_right)
     
     html_content = markdown.markdown(
         md_content, 
@@ -156,19 +294,24 @@ def convert_markdown_to_pdf(
                 size: A4;
                 margin: 1in 0.8in 1in 0.8in;
                 @top-center {{
-                    content: '{header_text}';
+                    content: {header_css};
                     font-size: 14px;
                     font-weight: bold;
                     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 }}
                 @bottom-left {{
-                    content: '{footer_left}';
-                    font-size: 12px;
+                    content: {footer_left_css};
+                    font-size: 10px;
+                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                }}
+                @bottom-center {{
+                    content: {footer_center_css};
+                    font-size: 10px;
                     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 }}
                 @bottom-right {{
-                    content: '{footer_right}';
-                    font-size: 12px;
+                    content: {footer_right_css};
+                    font-size: 10px;
                     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 }}
             }}
@@ -296,7 +439,8 @@ def convert_file(
     root_dir: str = None,
     output_dir: str = None,
     force: bool = False,
-    verbose: bool = False
+    verbose: bool = False,
+    page_settings: dict = None
 ) -> tuple[str, bool, str]:
     """
     Convert a single file (MD or PDF) and return the PDF path.
@@ -310,6 +454,7 @@ def convert_file(
         output_dir: Output directory for converted PDFs
         force: Force reconversion
         verbose: Print progress
+        page_settings: Header/footer configuration for PDF conversion
         
     Returns:
         Tuple of (pdf_path, was_converted, error_message)
@@ -334,7 +479,9 @@ def convert_file(
                 return None, False, f"MD file not found: {file_path}"
             
             pdf_path = get_output_pdf_path(file_path, root_dir, output_dir)
-            pdf_path, was_converted = convert_markdown_to_pdf(file_path, pdf_path, force=force)
+            pdf_path, was_converted = convert_markdown_to_pdf(
+                file_path, pdf_path, page_settings=page_settings, force=force
+            )
             
             if verbose and was_converted:
                 print(f"  Converted: {os.path.relpath(file_path, root_dir)}")
@@ -355,7 +502,8 @@ def convert_files_parallel(
     output_dir: str = None,
     force: bool = False,
     verbose: bool = True,
-    max_workers: int = 1  # WeasyPrint is not thread-safe
+    max_workers: int = 1,  # WeasyPrint is not thread-safe
+    page_settings: dict = None
 ) -> tuple[list[str], int, int]:
     """
     Convert multiple files sequentially.
@@ -369,6 +517,7 @@ def convert_files_parallel(
         force: Force reconversion
         verbose: Print progress
         max_workers: Ignored (kept for API compatibility)
+        page_settings: Header/footer configuration for PDF conversion
         
     Returns:
         Tuple of (pdf_paths, converted_count, failed_count)
@@ -402,7 +551,7 @@ def convert_files_parallel(
     for md_file in md_files:
         try:
             pdf_path, was_converted, error = convert_file(
-                md_file, root_dir, output_dir, force, False
+                md_file, root_dir, output_dir, force, False, page_settings
             )
             if error:
                 if verbose:
