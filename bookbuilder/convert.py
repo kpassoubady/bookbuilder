@@ -332,8 +332,8 @@ def convert_markdown_to_pdf(
                 margin-bottom: 0.5em;
                 color: #222;
             }}
-            h1 {{ font-size: 24pt; }}
-            h2 {{ font-size: 18pt; }}
+            h1 {{ font-size: 18pt; }}
+            h2 {{ font-size: 16pt; }}
             h3 {{ font-size: 14pt; }}
             h4 {{ font-size: 12pt; }}
             

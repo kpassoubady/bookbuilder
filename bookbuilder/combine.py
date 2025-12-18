@@ -200,7 +200,7 @@ def create_toc_page(chapter_info: list[dict], book_title: str, output_path: str)
         page_num = chapter['page']
         
         c.setFillColor(HexColor("#0066CC"))
-        c.drawString(1.5 * inch, y_position, f"{i + 1}. {section_name}")
+        c.drawString(1.5 * inch, y_position, section_name)
         c.setFillColor(HexColor("#000000"))
         c.drawRightString(width - 1.5 * inch, y_position, f"Page {page_num}")
         
@@ -211,11 +211,11 @@ def create_toc_page(chapter_info: list[dict], book_title: str, output_path: str)
             y_position = height - 1.5 * inch
             c.setFont("Helvetica", 11)
     
-    # Footer
-    c.setFont("Helvetica-Oblique", 9)
+    # Footer - match other pages: left=date, center=page, right=attribution
+    c.setFont("Helvetica", 9)
     c.setFillColor(HexColor("#666666"))
-    c.drawCentredString(width / 2, 0.5 * inch, 
-                        f"Generated on {datetime.date.today().strftime('%B %d, %Y')}")
+    c.drawString(0.8 * inch, 0.5 * inch, datetime.date.today().strftime('%B %d, %Y'))
+    c.drawRightString(width - 0.8 * inch, 0.5 * inch, "Kangs | Kavin School")
     
     c.save()
 
