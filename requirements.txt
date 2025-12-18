@@ -1,0 +1,14 @@
+# BookBuilder Dependencies
+# Install with: pip install -r requirements.txt
+
+# Markdown to HTML conversion
+markdown>=3.4.0
+
+# HTML to PDF conversion
+weasyprint>=59.0
+
+# PDF manipulation (merging, reading)
+PyPDF2>=3.0.0
+
+# PDF generation (TOC page)
+reportlab>=4.0.0

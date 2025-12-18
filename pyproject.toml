@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bookbuilder"
+version = "2.0.0"
+description = "A standalone tool for building PDF books from markdown files"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Kangeyan Passoubady", email = "kangs@kavinschool.com"}
+]
+keywords = ["pdf", "markdown", "book", "converter", "documentation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Documentation",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "markdown>=3.4.0",
+    "weasyprint>=59.0",
+    "PyPDF2>=3.0.0",
+    "reportlab>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/kpassoubady/bookbuilder"
+Repository = "https://github.com/kpassoubady/bookbuilder"
+Issues = "https://github.com/kpassoubady/bookbuilder/issues"
+
+[project.scripts]
+bookbuilder = "bookbuilder.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bookbuilder*"]
+
+[tool.setuptools.package-data]
+bookbuilder = ["examples/*.json"]

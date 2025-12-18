@@ -1,0 +1,244 @@
+{
+  "bookTitle": "Copilot Training Book",
+  "outputFilename": "Copilot-Training-Book.pdf",
+  "chapters": [
+    {
+      "section": "Front Cover",
+      "files": [
+        "docs/FrontCoverPage.pdf"
+      ]
+    },
+    {
+      "section": "About the Author",
+      "files": [
+        "docs/AboutAuthor.md"
+      ]
+    },
+    {
+      "section": "Catalog & Welcome",
+      "files": [
+        "0.0-catalog/GitHub Copilot - 1 Day - Personal Expense Tracker.md",
+        "Welcome.md"
+      ]
+    },
+    {
+      "section": "Install & License",
+      "files": [
+        "install.md",
+        "LICENSE.md"
+      ]
+    },
+    {
+      "section": "Course Contents",
+      "files": [
+        "0.1-course-contents/README.md",
+        "0.1-course-contents/1-0.GitHub-Copilot-Overview.md",
+        "0.1-course-contents/1.1-AI-Powered Coding Assistant Capabilities.md",
+        "0.1-course-contents/1.2-How Copilot Enhances Developer Productivity.md",
+        "0.1-course-contents/1.3-Comparison of AI tools.md",
+        "0.1-course-contents/1.4-Copilot-IDE-Integration.md",
+        "0.1-course-contents/2.1-GitHub-Copilot-Setup-Commands.md",
+        "0.1-course-contents/3-1-Copilot-Interface-Basic-Usage.md",
+        "0.1-course-contents/3-2-Copilot-Chat-Interface-Exercise.md",
+        "0.1-course-contents/3-3-Code-Generation-Practical-Exercises.md",
+        "0.1-course-contents/Copilot-Agents.md",
+        "0.1-course-contents/Copilot-Auto-Commit-Setup.md",
+        "0.1-course-contents/Copilot-Built-In-Modes.md",
+        "0.1-course-contents/Copilot-Chat-Cookbook.md",
+        "0.1-course-contents/Copilot-Chat-Models.md",
+        "0.1-course-contents/Copilot-Chat-Participants.md",
+        "0.1-course-contents/Copilot-Custom-Chat-Modes.md",
+        "0.1-course-contents/Copilot-Custom-Instructions.md",
+        "0.1-course-contents/Copilot-Debugging.md",
+        "0.1-course-contents/Copilot-Documentation-Generation.md",
+        "0.1-course-contents/Copilot-Editing-Session.md",
+        "0.1-course-contents/Copilot-Edits-Multi-File.md",
+        "0.1-course-contents/Copilot-Ethics-Security.md",
+        "0.1-course-contents/Copilot-Hash-Context.md",
+        "0.1-course-contents/Copilot-Inline-Chat.md",
+        "0.1-course-contents/Copilot-Limitations.md",
+        "0.1-course-contents/Copilot-Prompt-Files.md",
+        "0.1-course-contents/Copilot-Setup-Guide.md",
+        "0.1-course-contents/Copilot-ShortCuts.md",
+        "0.1-course-contents/Copilot-Slash-Commands.md",
+        "0.1-course-contents/Copilot-Tool-Sets.md",
+        "0.1-course-contents/Copilot-Usage-Tracking.md",
+        "0.1-course-contents/Copilot-VS-Code-Settings-Reference.md",
+        "0.1-course-contents/Copilot-Workspace-Context.md",
+        "0.1-course-contents/Copilot-info.md",
+        "0.1-course-contents/Disable-Copilot.md",
+        "0.1-course-contents/GitHub-Copilot-Day1-Essentials.md",
+        "0.1-course-contents/VS-Code-GitHub-Copilot-Logs.md",
+        "0.1-course-contents/VS-Code-Restore-Points.md",
+        "0.1-course-contents/VSCode-WorkSpace.md",
+        "0.1-course-contents/IntelliJ/Capability-Comparison.md",
+        "0.1-course-contents/IntelliJ/Copilot-Shortcuts.md",
+        "0.1-course-contents/IntelliJ/Feature-Support.md"
+      ]
+    },
+    {
+      "section": "Java Track",
+      "files": [
+        "1-1-java-exercise/0-copilot-mastery-guide.md",
+        "1-1-java-exercise/0-Java-Personal-Expense-Tracker-Breakout.md",
+        "1-1-java-exercise/2.0-Java-Project-Overview-Personal-Expense-Manager.md",
+        "1-1-java-exercise/1-setup/day1-backend-setup.md",
+        "1-1-java-exercise/1-setup/day1-frontend-setup.md",
+        "1-1-java-exercise/2-breakout/1-Day1-Session1-Entities-Repositories.md",
+        "1-1-java-exercise/2-breakout/2-Day1-Session2-Services-Business-Logic.md",
+        "1-1-java-exercise/2-breakout/3-Day1-Session-REST-APIs-Controllers.md",
+        "1-1-java-exercise/2-breakout/4-Day1-Session-Web-Interface-Templates.md",
+        "1-1-java-exercise/2-breakout/4-Web-Interface-Comparison-Guide.md",
+        "1-1-java-exercise/2-breakout/4a-Day1-Session-Web-Interface-HTMX.md",
+        "1-1-java-exercise/2-breakout/4b-Day1-Session-Web-Interface-Vaadin.md",
+        "1-1-java-exercise/2-breakout/4c-Day1-Session-Web-Interface-React.md",
+        "1-1-java-exercise/3-games/README.md",
+        "1-1-java-exercise/3-games/Game 1 - Prompt Battle Coding Task.md",
+        "1-1-java-exercise/3-games/Game 2 - Live Coding - Ascii Cat.md",
+        "1-1-java-exercise/3-games/Game 3 - Guess the Prompt.md",
+        "1-1-java-exercise/3-games/Game 4 - AI Ethics Debate.md",
+        "1-1-java-exercise/3-games/Game 5 - Role Play.md",
+        "1-1-java-exercise/3-games/Game 6 - Pick a simple problem to solve.md",
+        "1-1-java-exercise/3-games/Game 7 - Oh No - I'm a programmer.md",
+        "1-1-java-exercise/3-games/Game 8 - Prompt Whisperer.md",
+        "1-1-java-exercise/3-games/Game 9 - Hallucination Hunter.md",
+        "1-1-java-exercise/3-games/Game 10 - Copilot Golf.md",
+        "1-1-java-exercise/3-games/Game 11 - Context Master.md",
+        "1-1-java-exercise/3-games/Game 12 - Command Relay Race.md",
+        "1-1-java-exercise/3-games/Game 13 - Doc or Die.md",
+        "1-1-java-exercise/3-games/Game 14 - Test Architect.md",
+        "1-1-java-exercise/3-games/Game 15 - Git Whisperer.md",
+        "1-1-java-exercise/3-games/Game 16 - Agent Arena.md"
+      ]
+    },
+    {
+      "section": "Python Track",
+      "files": [
+        "2-1-python-exercise/0-copilot-mastery-guide.md",
+        "2-1-python-exercise/0-Python-Personal-Expense-Tracker-Breakout.md",
+        "2-1-python-exercise/1-setup/day1-backend-setup.md",
+        "2-1-python-exercise/1-setup/day1-frontend-setup.md",
+        "2-1-python-exercise/2-breakout/1-Day1-Session1-Models-Database.md",
+        "2-1-python-exercise/2-breakout/2-Day1-Session2-Services-Business-Logic.md",
+        "2-1-python-exercise/2-breakout/3-Day1-Session3-REST-APIs-Routes.md",
+        "2-1-python-exercise/2-breakout/4-Day1-Session4-Web-Foundation-Layout.md",
+        "2-1-python-exercise/2-breakout/5-Day1-Session5-Feature-Templates.md",
+        "2-1-python-exercise/3-games/README.md",
+        "2-1-python-exercise/3-games/Game 1 - Prompt Battle Coding Task.md",
+        "2-1-python-exercise/3-games/Game 2 - Live Coding - Ascii Cat.md",
+        "2-1-python-exercise/3-games/Game 3 - Guess the Prompt.md",
+        "2-1-python-exercise/3-games/Game 4 - AI Ethics Debate.md",
+        "2-1-python-exercise/3-games/Game 5 - Role Play.md",
+        "2-1-python-exercise/3-games/Game 6 - Pick a simple problem to solve.md",
+        "2-1-python-exercise/3-games/Game 7 - Oh No - I'm a programmer.md",
+        "2-1-python-exercise/3-games/Game 8 - Prompt Whisperer.md",
+        "2-1-python-exercise/3-games/Game 9 - Hallucination Hunter.md",
+        "2-1-python-exercise/3-games/Game 10 - Copilot Golf.md",
+        "2-1-python-exercise/3-games/Game 11 - Context Master.md",
+        "2-1-python-exercise/3-games/Game 12 - Command Relay Race.md",
+        "2-1-python-exercise/3-games/Game 13 - Doc or Die.md",
+        "2-1-python-exercise/3-games/Game 14 - Test Architect.md",
+        "2-1-python-exercise/3-games/Game 15 - Git Whisperer.md",
+        "2-1-python-exercise/3-games/Game 16 - Agent Arena.md"
+      ]
+    },
+    {
+      "section": ".NET Track",
+      "files": [
+        "3-1-dotnet-exercise/README.md",
+        "3-1-dotnet-exercise/0-copilot-mastery-guide.md",
+        "3-1-dotnet-exercise/0-DotNet-Personal-Expense-Tracker-Breakout.md",
+        "3-1-dotnet-exercise/2.0-DotNet-Project-Overview-Personal-Expense-Tracker.md",
+        "3-1-dotnet-exercise/1-setup/day1-backend-setup.md",
+        "3-1-dotnet-exercise/1-setup/day1-frontend-setup.md",
+        "3-1-dotnet-exercise/2-breakout/1-Day1-Session1-Models-DbContext.md",
+        "3-1-dotnet-exercise/2-breakout/2-Day1-Session2-Services-Business-Logic.md",
+        "3-1-dotnet-exercise/2-breakout/3-Day1-Session3-REST-APIs-Controllers.md",
+        "3-1-dotnet-exercise/2-breakout/4-Day1-Session4-Web-Interface-Razor.md",
+        "3-1-dotnet-exercise/3-games/README.md",
+        "3-1-dotnet-exercise/3-games/Game 1 - Prompt Battle Coding Task.md",
+        "3-1-dotnet-exercise/3-games/Game 2 - Live Coding - Ascii Cat.md",
+        "3-1-dotnet-exercise/3-games/Game 3 - Guess the Prompt.md",
+        "3-1-dotnet-exercise/3-games/Game 4 - AI Ethics Debate.md",
+        "3-1-dotnet-exercise/3-games/Game 5 - Role Play.md",
+        "3-1-dotnet-exercise/3-games/Game 6 - Pick a simple problem to solve.md",
+        "3-1-dotnet-exercise/3-games/Game 7 - Oh No - I'm a programmer.md",
+        "3-1-dotnet-exercise/3-games/Game 8 - Prompt Whisperer.md",
+        "3-1-dotnet-exercise/3-games/Game 9 - Hallucination Hunter.md",
+        "3-1-dotnet-exercise/3-games/Game 10 - Copilot Golf.md",
+        "3-1-dotnet-exercise/3-games/Game 11 - Context Master.md",
+        "3-1-dotnet-exercise/3-games/Game 12 - Command Relay Race.md",
+        "3-1-dotnet-exercise/3-games/Game 13 - Doc or Die.md",
+        "3-1-dotnet-exercise/3-games/Game 14 - Test Architect.md",
+        "3-1-dotnet-exercise/3-games/Game 15 - Git Whisperer.md",
+        "3-1-dotnet-exercise/3-games/Game 16 - Agent Arena.md"
+      ]
+    },
+    {
+      "section": "Data Analysis Track",
+      "files": [
+        "4-2-python-data-analysis-exercise/README.md",
+        "4-2-python-data-analysis-exercise/1-setup/FAQs.md",
+        "4-2-python-data-analysis-exercise/1-setup/intro_pandas.md",
+        "4-2-python-data-analysis-exercise/2-breakout/ExercisePandasWithCars.md",
+        "4-2-python-data-analysis-exercise/3-games/README.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 1 - Data Wrangling Challenge.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 2 - Visualization Battle.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 3 - EDA Detective.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 4 - DataFrame Golf.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 5 - Chart Whisperer.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 6 - Data Storyteller.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 7 - Missing Data Mystery.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 8 - Aggregation Arena.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 9 - Time Series Tracker.md",
+        "4-2-python-data-analysis-exercise/3-games/Game 10 - ML Pipeline Builder.md"
+      ]
+    },
+    {
+      "section": "Project 1",
+      "files": [
+        "1-2-project1/install/proj1-install-mac.md",
+        "1-2-project1/install/proj1-install-win.md"
+      ]
+    },
+    {
+      "section": "Project 2",
+      "files": [
+        "2-2-project2/task-manager/README.md",
+        "2-2-project2/install/proj2-install-mac.md",
+        "2-2-project2/install/proj2-install-win.md"
+      ]
+    },
+    {
+      "section": "Project 3",
+      "files": [
+        "3-2-project3/task-manager/README.md",
+        "3-2-project3/install/proj3-install-mac.md",
+        "3-2-project3/install/proj3-install-win.md"
+      ]
+    },
+    {
+      "section": "Project 4",
+      "files": [
+        "4-1-project4/Readme.md",
+        "4-1-project4/data-pipeline/README.md",
+        "4-1-project4/install/proj4-install-mac.md",
+        "4-1-project4/install/proj4-install-win.md"
+      ]
+    },
+    {
+      "section": "Agents",
+      "files": [
+        ".github/agents/AgentForPerformanceOptimization.agent.md",
+        ".github/agents/api-testing-specialist.agent.md",
+        ".github/agents/training-instructor.agent.md"
+      ]
+    },
+    {
+      "section": "Back Cover",
+      "files": [
+        "docs/BackCoverPage.pdf"
+      ]
+    }
+  ]
+}
