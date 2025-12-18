@@ -39,16 +39,25 @@ pip install markdown weasyprint PyPDF2 reportlab
 ## Quick Start
 
 ```bash
-# Build a book from an order JSON file
+# Build a book with root directory, output directory, and order file
+bookbuilder build \
+  --root /Users/kangs/github/copilot-United \
+  --output-dir /Users/kangs/finished-books \
+  --order /Users/kangs/github/bookbuilder/examples/shortBookOrderPdfs.json
+
+# Build from current directory with order file
 bookbuilder build --order ./book-order.json
 
-# Build with explicit root directory  
-bookbuilder build --root /path/to/project --order book-order.json
+# Build with custom output filename
+bookbuilder build --root ./my-project --order ./order.json --output MyBook.pdf
 
-# Build with custom output directory
-bookbuilder build --order ./order.json --output-dir ./my-output
+# Force reconvert all files (ignore cache)
+bookbuilder build --order ./order.json --force
 
-# Cleanup output directory
+# Cleanup output directory (dry run - shows what would be deleted)
+bookbuilder cleanup --output-dir ./bookbuilder-output
+
+# Cleanup output directory (actually delete)
 bookbuilder cleanup --output-dir ./bookbuilder-output --confirm
 ```
 
