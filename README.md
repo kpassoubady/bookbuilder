@@ -1,6 +1,6 @@
 # BookBuilder
 
-A standalone tool for building PDF books from markdown files. Works with any project - no hardcoded paths.
+A standalone tool for building PDF books from markdown files.
 
 ## Features
 

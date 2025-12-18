@@ -159,17 +159,126 @@ def convert_markdown_to_pdf(
                     content: '{header_text}';
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 }}
                 @bottom-left {{
                     content: '{footer_left}';
                     font-size: 12px;
+                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 }}
                 @bottom-right {{
                     content: '{footer_right}';
                     font-size: 12px;
+                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 }}
             }}
-            body {{ font-family: Arial, sans-serif; }}
+            
+            /* Base font for all text */
+            body {{
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-size: 11pt;
+                line-height: 1.6;
+                color: #333;
+            }}
+            
+            /* Headings */
+            h1, h2, h3, h4, h5, h6 {{
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-weight: 600;
+                margin-top: 1.5em;
+                margin-bottom: 0.5em;
+                color: #222;
+            }}
+            h1 {{ font-size: 24pt; }}
+            h2 {{ font-size: 18pt; }}
+            h3 {{ font-size: 14pt; }}
+            h4 {{ font-size: 12pt; }}
+            
+            /* Paragraphs */
+            p {{
+                margin: 0.8em 0;
+            }}
+            
+            /* Code - inline and blocks */
+            code, pre, kbd, samp {{
+                font-family: "SF Mono", "Monaco", "Menlo", "Consolas", "Liberation Mono", monospace;
+                font-size: 10pt;
+            }}
+            
+            code {{
+                background-color: #f5f5f5;
+                padding: 0.2em 0.4em;
+                border-radius: 3px;
+            }}
+            
+            pre {{
+                background-color: #f5f5f5;
+                padding: 1em;
+                border-radius: 5px;
+                overflow-x: auto;
+                line-height: 1.4;
+            }}
+            
+            pre code {{
+                background-color: transparent;
+                padding: 0;
+            }}
+            
+            /* Tables */
+            table {{
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+                margin: 1em 0;
+                font-size: 10pt;
+            }}
+            
+            th, td {{
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }}
+            
+            th {{
+                background-color: #f5f5f5;
+                font-weight: 600;
+            }}
+            
+            tr:nth-child(even) {{
+                background-color: #fafafa;
+            }}
+            
+            /* Lists */
+            ul, ol {{
+                margin: 0.8em 0;
+                padding-left: 2em;
+            }}
+            
+            li {{
+                margin: 0.3em 0;
+            }}
+            
+            /* Blockquotes */
+            blockquote {{
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-style: italic;
+                margin: 1em 0;
+                padding: 0.5em 1em;
+                border-left: 4px solid #ddd;
+                color: #666;
+            }}
+            
+            /* Links */
+            a {{
+                color: #0066cc;
+                text-decoration: none;
+            }}
+            
+            /* Images */
+            img {{
+                max-width: 100%;
+                height: auto;
+            }}
         </style>
     </head>
     <body>
