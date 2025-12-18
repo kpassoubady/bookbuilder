@@ -169,31 +169,32 @@ cleanup_output(
 ## Package Structure
 
 ```
-bookbuilder/
-├── __init__.py          # Package exports
-├── __main__.py          # Entry point for python -m
-├── cli.py               # Command-line interface
-├── convert.py           # Markdown to PDF conversion
-├── combine.py           # PDF combining and book building
-├── cleanup.py           # PDF cleanup/deletion
-├── utils.py             # Shared utility functions
-├── pyproject.toml       # Package configuration
-├── requirements.txt     # Dependencies
-├── README.md            # This file
-├── LICENSE.md           # MIT License
-├── CHANGELOG.md         # Version history
-├── CONTRIBUTING.md      # Contribution guidelines
-├── CODE_OF_CONDUCT.md   # Community guidelines
-├── SECURITY.md          # Security policy
-├── .gitignore           # Git ignore rules
-├── .github/             # GitHub templates
-│   ├── PULL_REQUEST_TEMPLATE.md
-│   └── ISSUE_TEMPLATE/
-│       ├── bug_report.md
-│       └── feature_request.md
-└── examples/            # Example order files
-    ├── fullBookOrderPdfs.json
-    └── shortBookOrderPdfs.json
+bookbuilder/               # Repository root
+├── bookbuilder/           # Python package
+│   ├── __init__.py        # Package exports
+│   ├── __main__.py        # Entry point for python -m
+│   ├── cli.py             # Command-line interface
+│   ├── convert.py         # Markdown to PDF conversion
+│   ├── combine.py         # PDF combining and book building
+│   ├── cleanup.py         # PDF cleanup/deletion
+│   └── utils.py           # Shared utility functions
+├── examples/              # Example order files
+│   ├── fullBookOrderPdfs.json
+│   └── shortBookOrderPdfs.json
+├── pyproject.toml         # Package configuration
+├── requirements.txt       # Dependencies
+├── README.md              # This file
+├── LICENSE.md             # MIT License
+├── CHANGELOG.md           # Version history
+├── CONTRIBUTING.md        # Contribution guidelines
+├── CODE_OF_CONDUCT.md     # Community guidelines
+├── SECURITY.md            # Security policy
+├── .gitignore             # Git ignore rules
+└── .github/               # GitHub templates
+    ├── PULL_REQUEST_TEMPLATE.md
+    └── ISSUE_TEMPLATE/
+        ├── bug_report.md
+        └── feature_request.md
 ```
 
 ## License
