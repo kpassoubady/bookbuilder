@@ -151,6 +151,7 @@ bookbuilder build --order <path> [options]
 | `--output`, `-O`     | Custom output filename (overrides JSON `outputFilename`)                      |
 | `--cleanup`, `-c`    | Delete output directory after building                                        |
 | `--force`, `-f`      | Force reconversion of all MD files (ignore cache)                             |
+| `--config`, `-C`     | Path to custom config file (overrides defaults)                               |
 | `--quiet`, `-q`      | Suppress output messages                                                      |
 
 ### Cleanup Command
@@ -165,6 +166,79 @@ bookbuilder cleanup [options]
 | `--root`, `-r`       | Root directory (used to derive default output-dir)               |
 | `--confirm`          | Actually delete (without this, only shows what would be deleted) |
 | `--quiet`, `-q`      | Suppress output messages                                         |
+
+## Configuration
+
+BookBuilder uses a layered configuration system:
+
+1. **Built-in defaults** - Bundled with the package
+2. **Custom config file** - Specified via `--config` CLI option
+3. **Order JSON overrides** - `pageSettings` in your order JSON
+
+Later layers override earlier ones, allowing you to set organization-wide defaults in a config file while still customizing per-book settings in the order JSON.
+
+### Using a Custom Config File
+
+```bash
+# Build with custom config
+bookbuilder build --order ./order.json --config ./my-config.json
+```
+
+### Config File Structure
+
+Create a `bookbuilder-config.json` file (see `examples/bookbuilder-config.json`):
+
+```json
+{
+  "pageSettings": {
+    "header": "{title}",
+    "headerFallback": "{bookTitle}",
+    "footerLeft": "{date}",
+    "footerCenter": "Page {page} of {pages}",
+    "footerRight": "Your Company",
+    "dateFormat": "%B %d, %Y"
+  },
+  "styleSettings": {
+    "pageSize": "A4",
+    "margins": "1in 0.8in 1in 0.8in",
+    "fontFamily": "Helvetica Neue, Helvetica, Arial, sans-serif",
+    "monoFontFamily": "SF Mono, Monaco, Menlo, Consolas, Liberation Mono, monospace",
+    "bodyFontSize": "11pt",
+    "bodyLineHeight": "1.6",
+    "bodyColor": "#333333",
+    "headingColor": "#222222",
+    "h1FontSize": "18pt",
+    "h2FontSize": "16pt",
+    "h3FontSize": "14pt",
+    "h4FontSize": "12pt",
+    "codeFontSize": "10pt",
+    "tableFontSize": "10pt",
+    "codeBackground": "#f5f5f5",
+    "linkColor": "#0066cc"
+  },
+  "tocSettings": {
+    "titleFontSize": 24,
+    "subtitleFontSize": 14,
+    "subtitleText": "Table of Contents",
+    "entryFontSize": 11,
+    "lineColor": "#0066CC",
+    "entryColor": "#0066CC"
+  },
+  "defaults": {
+    "bookTitle": "Untitled Book",
+    "outputFilename": "book.pdf"
+  }
+}
+```
+
+### Configuration Sections
+
+| Section | Description |
+|---------|-------------|
+| `pageSettings` | Header/footer text and placeholders |
+| `styleSettings` | PDF styling (fonts, colors, sizes, margins) |
+| `tocSettings` | Table of Contents styling |
+| `defaults` | Default book title and output filename |
 
 ## Output Structure
 
@@ -196,7 +270,8 @@ output_pdf = build_book(
     output_dir="/path/to/output",
     output_filename="MyBook.pdf",
     force=False,
-    verbose=True
+    verbose=True,
+    config_path="./my-config.json"  # Optional custom config
 )
 
 # Cleanup
@@ -218,10 +293,12 @@ bookbuilder/               # Repository root
 │   ├── convert.py         # Markdown to PDF conversion
 │   ├── combine.py         # PDF combining and book building
 │   ├── cleanup.py         # PDF cleanup/deletion
-│   └── utils.py           # Shared utility functions
-├── examples/              # Example order files
+│   ├── utils.py           # Shared utility functions
+│   └── default-config.json # Built-in default configuration
+├── examples/              # Example order and config files
 │   ├── fullBookOrderPdfs.json
-│   └── shortBookOrderPdfs.json
+│   ├── shortBookOrderPdfs.json
+│   └── bookbuilder-config.json  # Example config file
 ├── pyproject.toml         # Package configuration
 ├── requirements.txt       # Dependencies
 ├── README.md              # This file

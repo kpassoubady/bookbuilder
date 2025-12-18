@@ -96,10 +96,22 @@ def cmd_build(args):
     
     root_dir, order_path, output_dir, output_filename = resolve_paths(args)
     
+    # Resolve config path if provided
+    config_path = None
+    if hasattr(args, 'config') and args.config:
+        config_path = args.config
+        if not os.path.isabs(config_path):
+            if os.path.exists(config_path):
+                config_path = os.path.abspath(config_path)
+            else:
+                config_path = os.path.join(root_dir, config_path)
+    
     if not args.quiet:
         print(f"Root directory: {root_dir}")
         print(f"Order file: {order_path}")
         print(f"Output directory: {output_dir}")
+        if config_path:
+            print(f"Config file: {config_path}")
         print("=" * 60)
     
     output_pdf = build_book(
@@ -108,7 +120,8 @@ def cmd_build(args):
         root_dir=root_dir,
         output_dir=output_dir,
         force=args.force if hasattr(args, 'force') else False,
-        verbose=not args.quiet
+        verbose=not args.quiet,
+        config_path=config_path
     )
     
     # Cleanup output directory if requested
@@ -156,6 +169,9 @@ Examples:
   
   # Force reconversion of all MD files
   bookbuilder build --order ./order.json --force
+  
+  # Build with custom config file
+  bookbuilder build --order ./order.json --config ./my-config.json
   
   # Cleanup output directory (dry run)
   bookbuilder cleanup --root /path/to/project
@@ -235,6 +251,11 @@ Order JSON Format:
         '--force', '-f',
         action='store_true',
         help='Force reconversion of all MD files (ignore cache)'
+    )
+    build_parser.add_argument(
+        '--config', '-C',
+        type=str,
+        help='Path to custom config file (overrides defaults)'
     )
     build_parser.set_defaults(func=cmd_build)
     

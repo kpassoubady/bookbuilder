@@ -47,4 +47,4 @@ where = ["."]
 include = ["bookbuilder*"]
 
 [tool.setuptools.package-data]
-bookbuilder = ["examples/*.json"]
+bookbuilder = ["*.json"]

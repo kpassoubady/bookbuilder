@@ -21,7 +21,9 @@ from .utils import (
     get_gitignore_patterns,
     is_ignored,
     get_default_output_dir,
-    ensure_dir
+    ensure_dir,
+    load_config,
+    deep_merge
 )
 from .convert import (
     convert_file,
@@ -166,7 +168,13 @@ def collect_files_for_chapter(
     return files
 
 
-def create_toc_page(chapter_info: list[dict], book_title: str, output_path: str) -> None:
+def create_toc_page(
+    chapter_info: list[dict], 
+    book_title: str, 
+    output_path: str,
+    toc_settings: dict = None,
+    page_settings: dict = None
+) -> None:
     """
     Create a clickable Table of Contents page using ReportLab.
     
@@ -174,32 +182,51 @@ def create_toc_page(chapter_info: list[dict], book_title: str, output_path: str)
         chapter_info: List of chapter information dictionaries
         book_title: Title for the TOC page
         output_path: Output PDF file path
+        toc_settings: TOC styling configuration
+        page_settings: Page header/footer configuration
     """
+    # Default TOC settings
+    toc = toc_settings or {}
+    page = page_settings or {}
+    
+    title_font_size = toc.get('titleFontSize', 24)
+    subtitle_font_size = toc.get('subtitleFontSize', 14)
+    subtitle_text = toc.get('subtitleText', 'Table of Contents')
+    entry_font_size = toc.get('entryFontSize', 11)
+    footer_font_size = toc.get('footerFontSize', 9)
+    line_color = toc.get('lineColor', '#0066CC')
+    entry_color = toc.get('entryColor', '#0066CC')
+    footer_color = toc.get('footerColor', '#666666')
+    
+    # Footer content from page settings
+    footer_right = page.get('footerRight', 'Your Company')
+    date_format = page.get('dateFormat', '%B %d, %Y')
+    
     c = canvas.Canvas(output_path, pagesize=letter)
     width, height = letter
     
     # Title
-    c.setFont("Helvetica-Bold", 24)
+    c.setFont("Helvetica-Bold", title_font_size)
     c.drawCentredString(width / 2, height - 1.5 * inch, book_title)
     
     # Subtitle
-    c.setFont("Helvetica", 14)
-    c.drawCentredString(width / 2, height - 2 * inch, "Table of Contents")
+    c.setFont("Helvetica", subtitle_font_size)
+    c.drawCentredString(width / 2, height - 2 * inch, subtitle_text)
     
     # Draw a line
-    c.setStrokeColor(HexColor("#0066CC"))
+    c.setStrokeColor(HexColor(line_color))
     c.setLineWidth(2)
     c.line(1.5 * inch, height - 2.3 * inch, width - 1.5 * inch, height - 2.3 * inch)
     
     # TOC entries
     y_position = height - 3 * inch
-    c.setFont("Helvetica", 11)
+    c.setFont("Helvetica", entry_font_size)
     
     for i, chapter in enumerate(chapter_info):
         section_name = chapter['section']
         page_num = chapter['page']
         
-        c.setFillColor(HexColor("#0066CC"))
+        c.setFillColor(HexColor(entry_color))
         c.drawString(1.5 * inch, y_position, section_name)
         c.setFillColor(HexColor("#000000"))
         c.drawRightString(width - 1.5 * inch, y_position, f"Page {page_num}")
@@ -209,13 +236,13 @@ def create_toc_page(chapter_info: list[dict], book_title: str, output_path: str)
         if y_position < 1.5 * inch:
             c.showPage()
             y_position = height - 1.5 * inch
-            c.setFont("Helvetica", 11)
+            c.setFont("Helvetica", entry_font_size)
     
-    # Footer - match other pages: left=date, center=page, right=attribution
-    c.setFont("Helvetica", 9)
-    c.setFillColor(HexColor("#666666"))
-    c.drawString(0.8 * inch, 0.5 * inch, datetime.date.today().strftime('%B %d, %Y'))
-    c.drawRightString(width - 0.8 * inch, 0.5 * inch, "Kangs | Kavin School")
+    # Footer - match other pages: left=date, right=attribution
+    c.setFont("Helvetica", footer_font_size)
+    c.setFillColor(HexColor(footer_color))
+    c.drawString(0.8 * inch, 0.5 * inch, datetime.date.today().strftime(date_format))
+    c.drawRightString(width - 0.8 * inch, 0.5 * inch, footer_right)
     
     c.save()
 
@@ -285,7 +312,8 @@ def build_book(
     root_dir: str = None,
     output_dir: str = None,
     force: bool = False,
-    verbose: bool = True
+    verbose: bool = True,
+    config_path: str = None
 ) -> str:
     """
     Build a complete PDF book from source files.
@@ -300,6 +328,7 @@ def build_book(
         output_dir: Output directory for converted PDFs (defaults to <root>/bookbuilder-output)
         force: Force reconversion of all MD files
         verbose: Print progress messages
+        config_path: Path to custom config file (optional)
         
     Returns:
         Path to generated book PDF
@@ -324,21 +353,32 @@ def build_book(
         print(f"Using order file: {order_json_path}")
         print(f"Output directory: {output_dir}")
     
+    # Load configuration (default + user config if provided)
+    config = load_config(config_path)
+    defaults = config.get('defaults', {})
+    
     # Load order JSON
     with open(order_json_path, 'r') as f:
         order_json = json.load(f)
     
-    book_title = order_json.get('bookTitle', 'Copilot Training Book')
+    book_title = order_json.get('bookTitle', defaults.get('bookTitle', 'Untitled Book'))
     chapters = order_json.get('chapters', [])
     
-    # Get page settings from JSON (header/footer configuration)
-    page_settings = order_json.get('pageSettings', {})
+    # Get page settings: merge config defaults with order JSON overrides
+    page_settings = deep_merge(
+        config.get('pageSettings', {}),
+        order_json.get('pageSettings', {})
+    )
     # Add bookTitle to page_settings so it can be used as a placeholder
     page_settings['bookTitle'] = book_title
     
+    # Get style and TOC settings from config
+    style_settings = config.get('styleSettings', {})
+    toc_settings = config.get('tocSettings', {})
+    
     # Get output filename from JSON if not provided via CLI
     if output_filename is None:
-        output_filename = order_json.get('outputFilename', 'Copilot-Training-Book.pdf')
+        output_filename = order_json.get('outputFilename', defaults.get('outputFilename', 'book.pdf'))
     
     # Collect all files needed for the book
     if verbose:
@@ -384,7 +424,8 @@ def build_book(
             output_dir,
             force,
             verbose,
-            page_settings=page_settings
+            page_settings=page_settings,
+            style_settings=style_settings
         )
         
         if verbose:
@@ -448,8 +489,9 @@ def build_book(
     
     # Create TOC page
     ensure_dir(output_dir)
-    toc_pdf = os.path.join(output_dir, '_toc.pdf')
-    create_toc_page(chapter_info, book_title, toc_pdf)
+    toc_filename = defaults.get('tocFilename', '_toc.pdf')
+    toc_pdf = os.path.join(output_dir, toc_filename)
+    create_toc_page(chapter_info, book_title, toc_pdf, toc_settings, page_settings)
     
     if verbose:
         print(f"\nCreated TOC page")

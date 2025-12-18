@@ -219,6 +219,7 @@ def convert_markdown_to_pdf(
     md_path: str, 
     pdf_path: str = None,
     page_settings: dict = None,
+    style_settings: dict = None,
     force: bool = False
 ) -> tuple[str, bool]:
     """
@@ -235,6 +236,8 @@ def convert_markdown_to_pdf(
             - footerRight: Right footer with placeholders
             - dateFormat: Date format string (default: %B %d, %Y)
             - bookTitle: Book title for {bookTitle} placeholder
+        style_settings: Dictionary with styling configuration
+            - pageSize, margins, fonts, colors, sizes, etc.
         force: Force reconversion even if cached
         
     Returns:
@@ -249,6 +252,7 @@ def convert_markdown_to_pdf(
     
     # Merge with defaults
     settings = {**DEFAULT_PAGE_SETTINGS, **(page_settings or {})}
+    styles = style_settings or {}
     
     # Ensure output directory exists
     ensure_dir(os.path.dirname(pdf_path))
@@ -286,56 +290,76 @@ def convert_markdown_to_pdf(
         extensions=['extra', 'toc', 'tables']
     )
     
+    # Get style values with defaults
+    page_size = styles.get('pageSize', 'A4')
+    margins = styles.get('margins', '1in 0.8in 1in 0.8in')
+    font_family = styles.get('fontFamily', 'Helvetica Neue, Helvetica, Arial, sans-serif')
+    mono_font = styles.get('monoFontFamily', 'SF Mono, Monaco, Menlo, Consolas, Liberation Mono, monospace')
+    body_font_size = styles.get('bodyFontSize', '11pt')
+    body_line_height = styles.get('bodyLineHeight', '1.6')
+    body_color = styles.get('bodyColor', '#333333')
+    heading_color = styles.get('headingColor', '#222222')
+    h1_size = styles.get('h1FontSize', '18pt')
+    h2_size = styles.get('h2FontSize', '16pt')
+    h3_size = styles.get('h3FontSize', '14pt')
+    h4_size = styles.get('h4FontSize', '12pt')
+    code_font_size = styles.get('codeFontSize', '10pt')
+    table_font_size = styles.get('tableFontSize', '10pt')
+    code_bg = styles.get('codeBackground', '#f5f5f5')
+    link_color = styles.get('linkColor', '#0066cc')
+    header_font_size = styles.get('headerFontSize', '14px')
+    footer_font_size = styles.get('footerFontSize', '10px')
+    
     html_template = f'''
     <html>
     <head>
         <style>
             @page {{
-                size: A4;
-                margin: 1in 0.8in 1in 0.8in;
+                size: {page_size};
+                margin: {margins};
                 @top-center {{
                     content: {header_css};
-                    font-size: 14px;
+                    font-size: {header_font_size};
                     font-weight: bold;
-                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                    font-family: "{font_family}";
                 }}
                 @bottom-left {{
                     content: {footer_left_css};
-                    font-size: 10px;
-                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                    font-size: {footer_font_size};
+                    font-family: "{font_family}";
                 }}
                 @bottom-center {{
                     content: {footer_center_css};
-                    font-size: 10px;
-                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                    font-size: {footer_font_size};
+                    font-family: "{font_family}";
                 }}
                 @bottom-right {{
                     content: {footer_right_css};
-                    font-size: 10px;
-                    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                    font-size: {footer_font_size};
+                    font-family: "{font_family}";
                 }}
             }}
             
             /* Base font for all text */
             body {{
-                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-                font-size: 11pt;
-                line-height: 1.6;
-                color: #333;
+                font-family: "{font_family}";
+                font-size: {body_font_size};
+                line-height: {body_line_height};
+                color: {body_color};
             }}
             
             /* Headings */
             h1, h2, h3, h4, h5, h6 {{
-                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-family: "{font_family}";
                 font-weight: 600;
                 margin-top: 1.5em;
                 margin-bottom: 0.5em;
-                color: #222;
+                color: {heading_color};
             }}
-            h1 {{ font-size: 18pt; }}
-            h2 {{ font-size: 16pt; }}
-            h3 {{ font-size: 14pt; }}
-            h4 {{ font-size: 12pt; }}
+            h1 {{ font-size: {h1_size}; }}
+            h2 {{ font-size: {h2_size}; }}
+            h3 {{ font-size: {h3_size}; }}
+            h4 {{ font-size: {h4_size}; }}
             
             /* Paragraphs */
             p {{
@@ -344,18 +368,18 @@ def convert_markdown_to_pdf(
             
             /* Code - inline and blocks */
             code, pre, kbd, samp {{
-                font-family: "SF Mono", "Monaco", "Menlo", "Consolas", "Liberation Mono", monospace;
-                font-size: 10pt;
+                font-family: "{mono_font}";
+                font-size: {code_font_size};
             }}
             
             code {{
-                background-color: #f5f5f5;
+                background-color: {code_bg};
                 padding: 0.2em 0.4em;
                 border-radius: 3px;
             }}
             
             pre {{
-                background-color: #f5f5f5;
+                background-color: {code_bg};
                 padding: 1em;
                 border-radius: 5px;
                 overflow-x: auto;
@@ -369,11 +393,11 @@ def convert_markdown_to_pdf(
             
             /* Tables */
             table {{
-                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-family: "{font_family}";
                 border-collapse: collapse;
                 width: 100%;
                 margin: 1em 0;
-                font-size: 10pt;
+                font-size: {table_font_size};
             }}
             
             th, td {{
@@ -383,7 +407,7 @@ def convert_markdown_to_pdf(
             }}
             
             th {{
-                background-color: #f5f5f5;
+                background-color: {code_bg};
                 font-weight: 600;
             }}
             
@@ -403,7 +427,7 @@ def convert_markdown_to_pdf(
             
             /* Blockquotes */
             blockquote {{
-                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                font-family: "{font_family}";
                 font-style: italic;
                 margin: 1em 0;
                 padding: 0.5em 1em;
@@ -413,7 +437,7 @@ def convert_markdown_to_pdf(
             
             /* Links */
             a {{
-                color: #0066cc;
+                color: {link_color};
                 text-decoration: none;
             }}
             
@@ -440,7 +464,8 @@ def convert_file(
     output_dir: str = None,
     force: bool = False,
     verbose: bool = False,
-    page_settings: dict = None
+    page_settings: dict = None,
+    style_settings: dict = None
 ) -> tuple[str, bool, str]:
     """
     Convert a single file (MD or PDF) and return the PDF path.
@@ -455,6 +480,7 @@ def convert_file(
         force: Force reconversion
         verbose: Print progress
         page_settings: Header/footer configuration for PDF conversion
+        style_settings: Styling configuration for PDF conversion
         
     Returns:
         Tuple of (pdf_path, was_converted, error_message)
@@ -480,7 +506,8 @@ def convert_file(
             
             pdf_path = get_output_pdf_path(file_path, root_dir, output_dir)
             pdf_path, was_converted = convert_markdown_to_pdf(
-                file_path, pdf_path, page_settings=page_settings, force=force
+                file_path, pdf_path, page_settings=page_settings, 
+                style_settings=style_settings, force=force
             )
             
             if verbose and was_converted:
@@ -503,7 +530,8 @@ def convert_files_parallel(
     force: bool = False,
     verbose: bool = True,
     max_workers: int = 1,  # WeasyPrint is not thread-safe
-    page_settings: dict = None
+    page_settings: dict = None,
+    style_settings: dict = None
 ) -> tuple[list[str], int, int]:
     """
     Convert multiple files sequentially.
@@ -518,6 +546,7 @@ def convert_files_parallel(
         verbose: Print progress
         max_workers: Ignored (kept for API compatibility)
         page_settings: Header/footer configuration for PDF conversion
+        style_settings: Styling configuration for PDF conversion
         
     Returns:
         Tuple of (pdf_paths, converted_count, failed_count)
@@ -551,7 +580,7 @@ def convert_files_parallel(
     for md_file in md_files:
         try:
             pdf_path, was_converted, error = convert_file(
-                md_file, root_dir, output_dir, force, False, page_settings
+                md_file, root_dir, output_dir, force, False, page_settings, style_settings
             )
             if error:
                 if verbose:

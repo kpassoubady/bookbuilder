@@ -1,0 +1,46 @@
+{
+  "pageSettings": {
+    "header": "{title}",
+    "headerFallback": "{bookTitle}",
+    "footerLeft": "{date}",
+    "footerCenter": "Page {page} of {pages}",
+    "footerRight": "Kangs | Kavin School",
+    "dateFormat": "%B %d, %Y"
+  },
+  "styleSettings": {
+    "pageSize": "A4",
+    "margins": "1in 0.8in 1in 0.8in",
+    "fontFamily": "Helvetica Neue, Helvetica, Arial, sans-serif",
+    "monoFontFamily": "SF Mono, Monaco, Menlo, Consolas, Liberation Mono, monospace",
+    "bodyFontSize": "11pt",
+    "bodyLineHeight": "1.6",
+    "bodyColor": "#333333",
+    "headingColor": "#222222",
+    "h1FontSize": "18pt",
+    "h2FontSize": "16pt",
+    "h3FontSize": "14pt",
+    "h4FontSize": "12pt",
+    "codeFontSize": "10pt",
+    "tableFontSize": "10pt",
+    "codeBackground": "#f5f5f5",
+    "linkColor": "#0066cc",
+    "headerFontSize": "14px",
+    "footerFontSize": "10px"
+  },
+  "tocSettings": {
+    "titleFontSize": 24,
+    "subtitleFontSize": 14,
+    "subtitleText": "Table of Contents",
+    "entryFontSize": 11,
+    "footerFontSize": 9,
+    "lineColor": "#0066CC",
+    "entryColor": "#0066CC",
+    "footerColor": "#666666"
+  },
+  "defaults": {
+    "bookTitle": "Untitled Book",
+    "outputFilename": "book.pdf",
+    "outputDirName": "bookbuilder-output",
+    "tocFilename": "_toc.pdf"
+  }
+}
