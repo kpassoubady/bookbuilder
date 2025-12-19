@@ -112,11 +112,22 @@ N/A
 ```
 
 ### Step 7: Provide Summary
-After completion, display:
+After completion, display a summary table with:
 - Branch name created
 - Commit hash
 - PR URL (from gh pr create output)
 - Next steps (review, merge instructions)
+
+**IMPORTANT**: Do NOT use bold formatting (**) around the PR URL. Show the URL as a plain link without any markdown bold markers. Bold formatting breaks the clickable link in the IDE.
+
+Example output format:
+```
+| Step | Status |
+|------|--------|
+| Branch | feature/my-feature |
+| Commit | abc1234 |
+| PR | https://github.com/user/repo/pull/1 |
+```
 
 ---
 
