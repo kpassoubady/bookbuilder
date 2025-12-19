@@ -19,7 +19,10 @@ from .utils import (
     get_gitignore_patterns, 
     is_ignored, 
     get_default_output_dir,
-    ensure_dir
+    ensure_dir,
+    filename_to_anchor,
+    rewrite_markdown_links,
+    inject_document_anchor
 )
 
 # Default page settings configuration
@@ -220,7 +223,8 @@ def convert_markdown_to_pdf(
     pdf_path: str = None,
     page_settings: dict = None,
     style_settings: dict = None,
-    force: bool = False
+    force: bool = False,
+    anchor_map: dict = None
 ) -> tuple[str, bool]:
     """
     Convert a markdown file to PDF with dynamic header and footer.
@@ -239,6 +243,7 @@ def convert_markdown_to_pdf(
         style_settings: Dictionary with styling configuration
             - pageSize, margins, fonts, colors, sizes, etc.
         force: Force reconversion even if cached
+        anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
         
     Returns:
         Tuple of (pdf_path, was_converted) - was_converted is False if cached
@@ -259,6 +264,10 @@ def convert_markdown_to_pdf(
     
     with open(md_path, 'r', encoding='utf-8') as f:
         md_content = f.read()
+    
+    # Rewrite internal .md links to anchor links if anchor_map provided
+    if anchor_map:
+        md_content = rewrite_markdown_links(md_content, anchor_map)
     
     # Extract title from markdown
     title = extract_title_from_markdown(md_content)
@@ -289,6 +298,10 @@ def convert_markdown_to_pdf(
         md_content, 
         extensions=['extra', 'toc', 'tables']
     )
+    
+    # Inject document anchor for internal linking
+    doc_anchor = filename_to_anchor(os.path.basename(md_path))
+    html_content = inject_document_anchor(html_content, doc_anchor)
     
     # Get style values with defaults
     page_size = styles.get('pageSize', 'A4')
@@ -382,8 +395,10 @@ def convert_markdown_to_pdf(
                 background-color: {code_bg};
                 padding: 1em;
                 border-radius: 5px;
-                overflow-x: auto;
                 line-height: 1.4;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }}
             
             pre code {{
@@ -465,7 +480,8 @@ def convert_file(
     force: bool = False,
     verbose: bool = False,
     page_settings: dict = None,
-    style_settings: dict = None
+    style_settings: dict = None,
+    anchor_map: dict = None
 ) -> tuple[str, bool, str]:
     """
     Convert a single file (MD or PDF) and return the PDF path.
@@ -481,6 +497,7 @@ def convert_file(
         verbose: Print progress
         page_settings: Header/footer configuration for PDF conversion
         style_settings: Styling configuration for PDF conversion
+        anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
         
     Returns:
         Tuple of (pdf_path, was_converted, error_message)
@@ -507,7 +524,8 @@ def convert_file(
             pdf_path = get_output_pdf_path(file_path, root_dir, output_dir)
             pdf_path, was_converted = convert_markdown_to_pdf(
                 file_path, pdf_path, page_settings=page_settings, 
-                style_settings=style_settings, force=force
+                style_settings=style_settings, force=force,
+                anchor_map=anchor_map
             )
             
             if verbose and was_converted:
@@ -531,7 +549,8 @@ def convert_files_parallel(
     verbose: bool = True,
     max_workers: int = 1,  # WeasyPrint is not thread-safe
     page_settings: dict = None,
-    style_settings: dict = None
+    style_settings: dict = None,
+    anchor_map: dict = None
 ) -> tuple[list[str], int, int]:
     """
     Convert multiple files sequentially.
@@ -547,6 +566,7 @@ def convert_files_parallel(
         max_workers: Ignored (kept for API compatibility)
         page_settings: Header/footer configuration for PDF conversion
         style_settings: Styling configuration for PDF conversion
+        anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
         
     Returns:
         Tuple of (pdf_paths, converted_count, failed_count)
@@ -580,7 +600,7 @@ def convert_files_parallel(
     for md_file in md_files:
         try:
             pdf_path, was_converted, error = convert_file(
-                md_file, root_dir, output_dir, force, False, page_settings, style_settings
+                md_file, root_dir, output_dir, force, False, page_settings, style_settings, anchor_map
             )
             if error:
                 if verbose:
