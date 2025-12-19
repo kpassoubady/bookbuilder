@@ -37,5 +37,11 @@ ENV/
 .DS_Store
 Thumbs.db
 
+# Testing / Coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
 # Project specific
 output/
