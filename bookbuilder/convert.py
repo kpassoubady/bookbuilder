@@ -11,6 +11,7 @@ Features:
 
 import os
 import re
+import gc
 import datetime
 import markdown
 from weasyprint import HTML
@@ -597,7 +598,7 @@ def convert_files_parallel(
         return pdf_paths, converted_count, failed_count
     
     # Convert MD files sequentially (WeasyPrint is not thread-safe)
-    for md_file in md_files:
+    for i, md_file in enumerate(md_files):
         try:
             pdf_path, was_converted, error = convert_file(
                 md_file, root_dir, output_dir, force, False, page_settings, style_settings, anchor_map
@@ -614,6 +615,12 @@ def convert_files_parallel(
                         print(f"  Converted: {os.path.relpath(md_file, root_dir)}")
                 elif verbose:
                     print(f"  Cached: {os.path.relpath(md_file, root_dir)}")
+            
+            # Force garbage collection every 10 files to prevent memory buildup
+            # This helps avoid macOS Objective-C runtime crashes with WeasyPrint
+            if was_converted and (i + 1) % 10 == 0:
+                gc.collect()
+                
         except Exception as e:
             if verbose:
                 print(f"  Error: {os.path.relpath(md_file, root_dir)} - {e}")
