@@ -23,7 +23,8 @@ from .utils import (
     get_default_output_dir,
     ensure_dir,
     load_config,
-    deep_merge
+    deep_merge,
+    build_anchor_map
 )
 from .convert import (
     convert_file,
@@ -413,6 +414,17 @@ def build_book(
         print(f"  Total files: {total_files}")
         print(f"  MD files to convert: {md_count}")
     
+    # Build anchor map for internal linking across all book files
+    all_book_files = []
+    for _, files in chapter_data:
+        all_book_files.extend(files)
+    all_book_files.extend(front_cover_files)
+    all_book_files.extend(back_cover_files)
+    anchor_map = build_anchor_map(all_book_files, root_dir)
+    
+    if verbose:
+        print(f"  Built anchor map with {len(anchor_map)} entries for internal linking")
+    
     # Convert all MD files in parallel (lazy - only if needed)
     if all_files_to_convert:
         if verbose:
@@ -425,7 +437,8 @@ def build_book(
             force,
             verbose,
             page_settings=page_settings,
-            style_settings=style_settings
+            style_settings=style_settings,
+            anchor_map=anchor_map
         )
         
         if verbose:
