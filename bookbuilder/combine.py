@@ -9,6 +9,7 @@ Features:
 """
 
 import os
+import gc
 import json
 import datetime
 from PyPDF2 import PdfMerger, PdfReader
@@ -31,6 +32,37 @@ from .convert import (
     convert_files_parallel,
     get_output_pdf_path
 )
+from .formats import (
+    OutputFormat,
+    build_book_epub,
+    build_book_docx,
+    build_book_html,
+    get_format_extension
+)
+
+
+def safe_get_page_count(pdf_path: str) -> int:
+    """
+    Safely get page count from a PDF file.
+    
+    Returns 0 if the file cannot be read to allow skipping.
+    Includes garbage collection to prevent macOS memory issues.
+    
+    Args:
+        pdf_path: Path to PDF file
+        
+    Returns:
+        Number of pages, or 0 if error
+    """
+    try:
+        reader = PdfReader(pdf_path)
+        count = len(reader.pages)
+        del reader
+        gc.collect()
+        return count
+    except Exception as e:
+        print(f"  Warning: Could not read PDF {os.path.basename(pdf_path)}: {e}")
+        return 0
 
 
 def resolve_file_path(file_ref: str, root_dir: str) -> str:
@@ -270,41 +302,59 @@ def combine_pdfs_with_bookmarks(
     merger = PdfMerger()
     current_page = 0
     
-    # Add front cover first
-    if front_cover and os.path.isfile(front_cover):
-        merger.append(front_cover)
-        front_cover_pages = len(PdfReader(front_cover).pages)
-        current_page += front_cover_pages
-        print(f"Added front cover ({front_cover_pages} pages)")
-    
-    # Add TOC
-    merger.append(toc_pdf)
-    toc_pages = len(PdfReader(toc_pdf).pages)
-    current_page += toc_pages
-    print(f"Added TOC ({toc_pages} pages)")
-    
-    # Add all chapter PDFs with bookmarks
-    pdf_index = 0
-    
-    for chapter in chapter_info:
-        merger.add_outline_item(chapter['section'], current_page)
+    try:
+        # Add front cover first
+        if front_cover and os.path.isfile(front_cover):
+            try:
+                merger.append(front_cover)
+                front_cover_pages = safe_get_page_count(front_cover)
+                current_page += front_cover_pages
+                print(f"Added front cover ({front_cover_pages} pages)")
+            except Exception as e:
+                print(f"  Warning: Could not add front cover: {e}")
         
-        for _ in range(chapter['files']):
-            if pdf_index < len(pdf_list):
-                pdf = pdf_list[pdf_index]
-                page_count = len(PdfReader(pdf).pages)
-                merger.append(pdf)
-                current_page += page_count
-                pdf_index += 1
-    
-    # Add back cover last
-    if back_cover and os.path.isfile(back_cover):
-        merger.append(back_cover)
-        back_cover_pages = len(PdfReader(back_cover).pages)
-        print(f"Added back cover ({back_cover_pages} pages)")
-    
-    merger.write(output_pdf)
-    merger.close()
+        # Add TOC
+        try:
+            merger.append(toc_pdf)
+            toc_pages = safe_get_page_count(toc_pdf)
+            current_page += toc_pages
+            print(f"Added TOC ({toc_pages} pages)")
+        except Exception as e:
+            print(f"  Warning: Could not add TOC: {e}")
+        
+        # Add all chapter PDFs with bookmarks
+        pdf_index = 0
+        
+        for chapter in chapter_info:
+            merger.add_outline_item(chapter['section'], current_page)
+            
+            for _ in range(chapter['files']):
+                if pdf_index < len(pdf_list):
+                    pdf = pdf_list[pdf_index]
+                    try:
+                        page_count = safe_get_page_count(pdf)
+                        merger.append(pdf)
+                        current_page += page_count
+                    except Exception as e:
+                        print(f"  Warning: Could not add {os.path.basename(pdf)}: {e}")
+                    pdf_index += 1
+            
+            # Garbage collection after each chapter to prevent memory buildup
+            gc.collect()
+        
+        # Add back cover last
+        if back_cover and os.path.isfile(back_cover):
+            try:
+                merger.append(back_cover)
+                back_cover_pages = safe_get_page_count(back_cover)
+                print(f"Added back cover ({back_cover_pages} pages)")
+            except Exception as e:
+                print(f"  Warning: Could not add back cover: {e}")
+        
+        merger.write(output_pdf)
+    finally:
+        merger.close()
+        gc.collect()
 
 
 def build_book(
@@ -314,10 +364,11 @@ def build_book(
     output_dir: str = None,
     force: bool = False,
     verbose: bool = True,
-    config_path: str = None
+    config_path: str = None,
+    output_format: OutputFormat = None
 ) -> str:
     """
-    Build a complete PDF book from source files.
+    Build a complete book from source files in the specified format.
     
     Supports MD files, PDF files, and directories in the order JSON.
     MD files are converted on-demand (lazy conversion) with caching.
@@ -330,10 +381,14 @@ def build_book(
         force: Force reconversion of all MD files
         verbose: Print progress messages
         config_path: Path to custom config file (optional)
+        output_format: Output format (PDF, EPUB, DOCX, HTML). Defaults to PDF.
         
     Returns:
-        Path to generated book PDF
+        Path to generated book file
     """
+    # Default to PDF format
+    if output_format is None:
+        output_format = OutputFormat.PDF
     # Set defaults
     if root_dir is None:
         root_dir = os.getcwd()
@@ -381,6 +436,10 @@ def build_book(
     if output_filename is None:
         output_filename = order_json.get('outputFilename', defaults.get('outputFilename', 'book.pdf'))
     
+    # Adjust output filename extension based on format
+    base_name = os.path.splitext(output_filename)[0]
+    output_filename = base_name + get_format_extension(output_format)
+    
     # Collect all files needed for the book
     if verbose:
         print(f"\nCollecting files for {len(chapters)} chapters...")
@@ -425,6 +484,83 @@ def build_book(
     if verbose:
         print(f"  Built anchor map with {len(anchor_map)} entries for internal linking")
     
+    # Get author from order JSON or config
+    author = order_json.get('author', defaults.get('author', None))
+    
+    # Get cover image path if specified
+    cover_image = None
+    if front_cover_files:
+        for f in front_cover_files:
+            # Look for image files for EPUB cover
+            if f.lower().endswith(('.jpg', '.jpeg', '.png')):
+                if os.path.exists(f):
+                    cover_image = f
+                    break
+    
+    # Output file path
+    ensure_dir(output_dir)
+    output_file = os.path.join(output_dir, output_filename)
+    
+    # Handle non-PDF formats using Pandoc
+    if output_format != OutputFormat.PDF:
+        # Collect all MD files in order for Pandoc
+        all_md_files = []
+        for _, files in chapter_data:
+            for f in files:
+                if f.lower().endswith('.md') and os.path.exists(f):
+                    all_md_files.append(f)
+        
+        if not all_md_files:
+            raise ValueError("No markdown files found to convert")
+        
+        if verbose:
+            print(f"\nBuilding {output_format.value.upper()} with Pandoc...")
+            print(f"  Source files: {len(all_md_files)}")
+        
+        # Build based on format
+        if output_format == OutputFormat.EPUB:
+            result_path, success, error = build_book_epub(
+                all_md_files,
+                output_file,
+                title=book_title,
+                author=author,
+                cover_image=cover_image,
+                toc=True,
+                verbose=verbose
+            )
+        elif output_format == OutputFormat.DOCX:
+            result_path, success, error = build_book_docx(
+                all_md_files,
+                output_file,
+                title=book_title,
+                author=author,
+                toc=True,
+                verbose=verbose
+            )
+        elif output_format == OutputFormat.HTML:
+            result_path, success, error = build_book_html(
+                all_md_files,
+                output_file,
+                title=book_title,
+                toc=True,
+                verbose=verbose
+            )
+        else:
+            raise ValueError(f"Unsupported format: {output_format}")
+        
+        if not success:
+            raise RuntimeError(f"Failed to build {output_format.value}: {error}")
+        
+        if verbose:
+            print(f"\n{'='*60}")
+            print(f"✓ Book created: {output_file}")
+            print(f"✓ Format: {output_format.value.upper()}")
+            print(f"✓ Total source files: {len(all_md_files)}")
+            print(f"{'='*60}")
+        
+        return output_file
+    
+    # PDF format: use existing WeasyPrint + PyPDF2 workflow
     # Convert all MD files in parallel (lazy - only if needed)
     if all_files_to_convert:
         if verbose:
@@ -465,7 +601,7 @@ def build_book(
     
     # Process chapters
     for section_name, files in chapter_data:
-        page_start = sum(len(PdfReader(pdf).pages) for pdf in ordered_pdfs)
+        page_start = sum(safe_get_page_count(pdf) for pdf in ordered_pdfs)
         chapter_pdfs = []
         
         for f in files:
@@ -493,7 +629,7 @@ def build_book(
             break
     
     # Adjust page numbers for front cover and TOC
-    front_cover_pages = len(PdfReader(front_cover).pages) if front_cover else 0
+    front_cover_pages = safe_get_page_count(front_cover) if front_cover else 0
     toc_pages = 1
     offset = front_cover_pages + toc_pages
     
@@ -501,7 +637,6 @@ def build_book(
         chapter['page'] += offset
     
     # Create TOC page
-    ensure_dir(output_dir)
     toc_filename = defaults.get('tocFilename', '_toc.pdf')
     toc_pdf = os.path.join(output_dir, toc_filename)
     create_toc_page(chapter_info, book_title, toc_pdf, toc_settings, page_settings)
@@ -509,23 +644,20 @@ def build_book(
     if verbose:
         print(f"\nCreated TOC page")
     
-    # Output finished book to the output directory
-    output_pdf = os.path.join(output_dir, output_filename)
-    
     if verbose:
         print(f"\nCombining {len(ordered_pdfs)} PDFs...")
     
     combine_pdfs_with_bookmarks(
-        ordered_pdfs, chapter_info, output_pdf, toc_pdf, front_cover, back_cover
+        ordered_pdfs, chapter_info, output_file, toc_pdf, front_cover, back_cover
     )
     
     if verbose:
         print(f"\n{'='*60}")
-        print(f"✓ Book created: {output_pdf}")
+        print(f"✓ Book created: {output_file}")
         print(f"✓ Front cover: {'Included' if front_cover else 'Not found'}")
         print(f"✓ Back cover: {'Included' if back_cover else 'Not found'}")
         print(f"✓ Total chapters: {len(chapter_info)}")
         print(f"✓ Total content PDFs: {len(ordered_pdfs)}")
         print(f"{'='*60}")
     
-    return output_pdf
+    return output_file

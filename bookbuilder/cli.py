@@ -16,6 +16,7 @@ from . import __version__
 from .combine import build_book
 from .cleanup import cleanup_output
 from .utils import get_default_output_dir
+from .formats import OutputFormat, check_pandoc_installed, get_supported_formats
 
 
 def resolve_paths(args):
@@ -81,17 +82,26 @@ def cmd_cleanup(args):
 
 def cmd_build(args):
     """
-    Handle the 'build' subcommand - build a PDF book.
+    Handle the 'build' subcommand - build a book in the specified format.
     
     The workflow:
     1. Read order JSON
     2. Convert only needed MD files (lazy, cached)
-    3. Create TOC
+    3. Create TOC (for PDF)
     4. Combine into final book
     5. Optionally cleanup output directory
     """
+    # Get output format
+    output_format = OutputFormat.from_string(args.format) if hasattr(args, 'format') and args.format else OutputFormat.PDF
+    
+    # Check Pandoc for non-PDF formats
+    if output_format != OutputFormat.PDF and not check_pandoc_installed():
+        print("Error: Pandoc is required for non-PDF formats.")
+        print("Install with: brew install pandoc")
+        return 1
+    
     print("=" * 60)
-    print("BookBuilder - Building Book")
+    print(f"BookBuilder - Building Book ({output_format.value.upper()})")
     print("=" * 60)
     
     root_dir, order_path, output_dir, output_filename = resolve_paths(args)
@@ -110,18 +120,20 @@ def cmd_build(args):
         print(f"Root directory: {root_dir}")
         print(f"Order file: {order_path}")
         print(f"Output directory: {output_dir}")
+        print(f"Output format: {output_format.value.upper()}")
         if config_path:
             print(f"Config file: {config_path}")
         print("=" * 60)
     
-    output_pdf = build_book(
+    output_file = build_book(
         order_json_path=order_path,
         output_filename=output_filename,
         root_dir=root_dir,
         output_dir=output_dir,
         force=args.force if hasattr(args, 'force') else False,
         verbose=not args.quiet,
-        config_path=config_path
+        config_path=config_path,
+        output_format=output_format
     )
     
     # Cleanup output directory if requested
@@ -138,9 +150,9 @@ def cmd_build(args):
         print()
         print("=" * 60)
         print("✓ Build Complete!")
-        print(f"✓ Output: {output_pdf}")
+        print(f"✓ Output: {output_file}")
         if os.path.exists(output_dir) and not args.cleanup:
-            print(f"✓ Converted PDFs cached in: {output_dir}")
+            print(f"✓ Intermediate files cached in: {output_dir}")
             print("  (Use --cleanup to delete after build)")
         print("=" * 60)
     
@@ -151,7 +163,7 @@ def main():
     """Main entry point for the CLI."""
     parser = argparse.ArgumentParser(
         prog='bookbuilder',
-        description='BookBuilder - Build PDF books from markdown files.',
+        description='BookBuilder - Build books from markdown files (PDF, EPUB, DOCX, HTML).',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -172,6 +184,15 @@ Examples:
   
   # Build with custom config file
   bookbuilder build --order ./order.json --config ./my-config.json
+  
+  # Build EPUB for Kindle (Amazon KDP)
+  bookbuilder build --order ./order.json --format epub
+  
+  # Build DOCX for Word
+  bookbuilder build --order ./order.json --format docx
+  
+  # Build standalone HTML
+  bookbuilder build --order ./order.json --format html
   
   # Cleanup output directory (dry run)
   bookbuilder cleanup --root /path/to/project
@@ -228,7 +249,7 @@ Order JSON Format:
     build_parser = subparsers.add_parser(
         'build',
         parents=[common_parser],
-        help='Build a PDF book from an order JSON file',
+        help='Build a book from an order JSON file (supports PDF, EPUB, DOCX, HTML)',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     build_parser.add_argument(
@@ -240,7 +261,14 @@ Order JSON Format:
     build_parser.add_argument(
         '--output', '-O',
         type=str,
-        help='Custom output filename for the generated PDF (overrides JSON)'
+        help='Custom output filename for the generated book (overrides JSON)'
+    )
+    build_parser.add_argument(
+        '--format', '-F',
+        type=str,
+        choices=['pdf', 'epub', 'docx', 'html'],
+        default='pdf',
+        help='Output format: pdf (default), epub (Kindle), docx (Word), html'
     )
     build_parser.add_argument(
         '--cleanup', '-c',

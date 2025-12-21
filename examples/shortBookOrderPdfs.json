@@ -1,6 +1,7 @@
 {
   "bookTitle": "GitHub Copilot - 1 Day Course Guide",
   "outputFilename": "Copilot-1Day-Course-Guide.pdf",
+  "author": "Kangeyan Passoubady",
   "pageSettings": {
     "header": "{title}",
     "headerFallback": "{bookTitle}",
@@ -13,7 +14,8 @@
     {
       "section": "Front Cover",
       "files": [
-        "docs/FrontCoverPage.pdf"
+        "docs/FrontCoverPage.pdf",
+         "images/FrontCoverPage.png"
       ]
     },
     {
@@ -25,7 +27,6 @@
     {
       "section": "1. Foundations: Generative AI & Tools Landscape",
       "files": [
-        "0.1-course-contents/README.md",
         "0.1-course-contents/1-0.GitHub-Copilot-Overview.md",
         "0.1-course-contents/1.1-AI-Powered Coding Assistant Capabilities.md",
         "0.1-course-contents/1.2-How Copilot Enhances Developer Productivity.md",
@@ -35,13 +36,10 @@
     {
       "section": "2. Copilot Setup & Interface Mastery",
       "files": [
-        "0.1-course-contents/Copilot-Setup-Guide.md",
         "0.1-course-contents/1.4-Copilot-IDE-Integration.md",
         "0.1-course-contents/Copilot-ShortCuts.md",
-        "0.1-course-contents/3-1-Copilot-Interface-Basic-Usage.md",
         "0.1-course-contents/Copilot-Inline-Chat.md",
-        "0.1-course-contents/Copilot-VS-Code-Settings-Reference.md",
-        "0.1-course-contents/2.1-GitHub-Copilot-Setup-Commands.md"
+        "0.1-course-contents/Copilot-VS-Code-Settings-Quick-Guide.md"
       ]
     },
     {
@@ -55,8 +53,6 @@
     {
       "section": "4. Backend Modeling with Copilot",
       "files": [
-        "0.1-course-contents/3-2-Copilot-Chat-Interface-Exercise.md",
-        "0.1-course-contents/3-3-Code-Generation-Practical-Exercises.md",
         "0.1-course-contents/Copilot-Chat-Cookbook.md",
         "0.1-course-contents/Copilot-Slash-Commands.md",
         "0.1-course-contents/Copilot-Built-In-Modes.md",
@@ -69,15 +65,13 @@
         "0.1-course-contents/Copilot-Hash-Context.md",
         "0.1-course-contents/Copilot-Workspace-Context.md",
         "0.1-course-contents/Copilot-Chat-Participants.md",
-        "0.1-course-contents/Copilot-Chat-Models.md",
-        "0.1-course-contents/GitHub-Copilot-Day1-Essentials.md"
+        "0.1-course-contents/Copilot-Chat-Models.md"
       ]
     },
     {
       "section": "6. Web Layer & Multi-File Edits",
       "files": [
         "0.1-course-contents/Copilot-Editing-Session.md",
-        "0.1-course-contents/Copilot-Edits-Multi-File.md",
         "0.1-course-contents/Copilot-Custom-Chat-Modes.md",
         "0.1-course-contents/Copilot-Prompt-Files.md"
       ]
@@ -96,8 +90,6 @@
     {
       "section": "8. Troubleshooting & Recovery",
       "files": [
-        "0.1-course-contents/VS-Code-GitHub-Copilot-Logs.md",
-        "0.1-course-contents/VS-Code-Restore-Points.md",
         "0.1-course-contents/Disable-Copilot.md"
       ]
     },
@@ -105,8 +97,6 @@
       "section": "9. Documentation & Reference",
       "files": [
         "0.1-course-contents/Copilot-Documentation-Generation.md",
-        "0.1-course-contents/Copilot-Usage-Tracking.md",
-        "0.1-course-contents/Copilot-info.md",
         "0.1-course-contents/VSCode-WorkSpace.md"
       ]
     },
