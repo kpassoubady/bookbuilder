@@ -70,6 +70,25 @@ def get_pandoc_version() -> Optional[str]:
         return None
 
 
+def get_resource_paths(input_files: list[str]) -> list[str]:
+    """
+    Get unique directory paths from input files for Pandoc resource resolution.
+    
+    This allows Pandoc to find images referenced with relative paths in markdown files.
+    
+    Args:
+        input_files: List of input file paths
+        
+    Returns:
+        List of unique directory paths
+    """
+    dirs = set()
+    for f in input_files:
+        if os.path.exists(f):
+            dirs.add(os.path.dirname(os.path.abspath(f)))
+    return list(dirs)
+
+
 def convert_with_pandoc(
     input_files: list[str],
     output_path: str,
@@ -79,7 +98,8 @@ def convert_with_pandoc(
     cover_image: str = None,
     css_file: str = None,
     metadata: dict = None,
-    extra_args: list = None
+    extra_args: list = None,
+    resource_paths: list[str] = None
 ) -> tuple[str, bool, Optional[str]]:
     """
     Convert files using Pandoc.
@@ -94,6 +114,7 @@ def convert_with_pandoc(
         css_file: Path to CSS file for styling
         metadata: Dictionary of metadata to include
         extra_args: Additional Pandoc arguments
+        resource_paths: List of directories where Pandoc should look for images
         
     Returns:
         Tuple of (output_path, success, error_message)
@@ -103,8 +124,18 @@ def convert_with_pandoc(
     
     ensure_dir(os.path.dirname(output_path))
     
-    # Pandoc handles multiple input files natively, preserving relative paths for images
+    # Pandoc handles multiple input files natively
     cmd = ['pandoc'] + input_files + ['-o', output_path, '--standalone']
+    
+    # Add resource paths for image resolution
+    # This tells Pandoc where to find images referenced with relative paths
+    if resource_paths is None:
+        resource_paths = get_resource_paths(input_files)
+    
+    if resource_paths:
+        # Join paths with : on Unix, ; on Windows
+        path_sep = ':' if os.name != 'nt' else ';'
+        cmd.extend(['--resource-path', path_sep.join(resource_paths)])
     
     # Add TOC if requested
     if toc:
@@ -220,11 +251,13 @@ def build_book_epub(
         print(f"Building EPUB: {output_path}")
         print(f"  Files: {len(md_files)}")
     
-    # Pass files directly to Pandoc - it handles multiple inputs natively
-    # This preserves relative image paths in each markdown file
+    # Pass files directly to Pandoc with resource paths for image resolution
     metadata = {'title': title}
     if author:
         metadata['author'] = author
+    
+    # Get all directories containing source files for image resolution
+    resource_paths = get_resource_paths(md_files)
     
     result = convert_with_pandoc(
         md_files,
@@ -234,7 +267,8 @@ def build_book_epub(
         toc=toc,
         cover_image=cover_image,
         css_file=css_file,
-        metadata=metadata
+        metadata=metadata,
+        resource_paths=resource_paths
     )
     
     if verbose and result[1]:
@@ -271,7 +305,7 @@ def build_book_docx(
         print(f"Building DOCX: {output_path}")
         print(f"  Files: {len(md_files)}")
     
-    # Pass files directly to Pandoc - preserves relative image paths
+    # Pass files directly to Pandoc with resource paths for image resolution
     metadata = {'title': title}
     if author:
         metadata['author'] = author
@@ -280,6 +314,9 @@ def build_book_docx(
     if reference_doc and os.path.exists(reference_doc):
         extra_args.extend(['--reference-doc', reference_doc])
     
+    # Get all directories containing source files for image resolution
+    resource_paths = get_resource_paths(md_files)
+    
     result = convert_with_pandoc(
         md_files,
         output_path,
@@ -287,7 +324,8 @@ def build_book_docx(
         title=title,
         toc=toc,
         metadata=metadata,
-        extra_args=extra_args if extra_args else None
+        extra_args=extra_args if extra_args else None,
+        resource_paths=resource_paths
     )
     
     if verbose and result[1]:
@@ -324,10 +362,13 @@ def build_book_html(
         print(f"Building HTML: {output_path}")
         print(f"  Files: {len(md_files)}")
     
-    # Pass files directly to Pandoc - preserves relative image paths
+    # Pass files directly to Pandoc with resource paths for image resolution
     extra_args = []
     if standalone:
         extra_args.append('--standalone')
+    
+    # Get all directories containing source files for image resolution
+    resource_paths = get_resource_paths(md_files)
     
     result = convert_with_pandoc(
         md_files,
@@ -336,7 +377,8 @@ def build_book_html(
         title=title,
         toc=toc,
         css_file=css_file,
-        extra_args=extra_args if extra_args else None
+        extra_args=extra_args if extra_args else None,
+        resource_paths=resource_paths
     )
     
     if verbose and result[1]:
