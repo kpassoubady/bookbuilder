@@ -1,13 +1,24 @@
 {
-  "bookTitle": "GitHub Copilot - 1 Day Course Guide",
-  "outputFilename": "Copilot-1Day-Course-Guide.pdf",
+  "bookTitle": "GitHub Copilot - The Comprehensive Guide",
+  "outputFilename": "Copilot-Book.pdf",
   "author": "Kangeyan Passoubady",
+  "contentProcessing": {
+    "detailsTagHandling": {
+      "enabled": true,
+      "staticFormats": ["pdf", "docx"],
+      "staticReplacement": {
+        "showSummary": true,
+        "summaryText": "Answers:",
+        "addHorizontalRule": true
+      }
+    }
+  },
   "pageSettings": {
     "header": "{title}",
     "headerFallback": "{bookTitle}",
     "footerLeft": "{date}",
     "footerCenter": "Page {page} of {pages}",
-    "footerRight": "Kangs | Kavin School",
+    "footerRight": "Kavin School",
     "dateFormat": "%B %d, %Y"
   },
   "chapters": [
@@ -15,7 +26,7 @@
       "section": "Front Cover",
       "files": [
         "docs/FrontCoverPage.pdf",
-         "images/FrontCoverPage.png"
+        "docs/FrontCoverPage.png"
       ]
     },
     {
@@ -25,85 +36,47 @@
       ]
     },
     {
-      "section": "1. Foundations: Generative AI & Tools Landscape",
+      "section": "Part I: Foundations & Setup",
       "files": [
-        "0.1-course-contents/1-0.GitHub-Copilot-Overview.md",
-        "0.1-course-contents/1.1-AI-Powered Coding Assistant Capabilities.md",
-        "0.1-course-contents/1.2-How Copilot Enhances Developer Productivity.md",
-        "0.1-course-contents/1.3-Comparison of AI tools.md"
+        "course-contents/01-Introduction.md",
+        "course-contents/02-Ethics-Responsibility.md",
+        "course-contents/03-Getting-Started.md"
       ]
     },
     {
-      "section": "2. Copilot Setup & Interface Mastery",
+      "section": "Part II: Core Skills",
       "files": [
-        "0.1-course-contents/1.4-Copilot-IDE-Integration.md",
-        "0.1-course-contents/Copilot-ShortCuts.md",
-        "0.1-course-contents/Copilot-Inline-Chat.md",
-        "0.1-course-contents/Copilot-VS-Code-Settings-Quick-Guide.md"
+        "course-contents/04-Mastering-Code-Completion.md",
+        "course-contents/05-Copilot-Chat.md",
+        "course-contents/06-Context-Mastery.md",
+        "course-contents/13-Interactive-Editing.md"
       ]
     },
     {
-      "section": "3. IntelliJ Resources",
+      "section": "Part III: Advanced Workflows",
       "files": [
-        "0.1-course-contents/IntelliJ/Copilot-Shortcuts.md",
-        "0.1-course-contents/IntelliJ/Capability-Comparison.md",
-        "0.1-course-contents/IntelliJ/Feature-Support.md"
+        "course-contents/07-Prompt-Engineering.md",
+        "course-contents/08-Automating-Workflows.md",
+        "course-contents/09-Customization.md"
       ]
     },
     {
-      "section": "4. Backend Modeling with Copilot",
+      "section": "Part IV: Cookbooks",
       "files": [
-        "0.1-course-contents/Copilot-Chat-Cookbook.md",
-        "0.1-course-contents/Copilot-Slash-Commands.md",
-        "0.1-course-contents/Copilot-Built-In-Modes.md",
-        "0.1-course-contents/Copilot-Debugging.md"
+        "course-contents/10-Scaffolding-Boilerplate.md",
+        "course-contents/11-Testing-Cookbook.md",
+        "course-contents/12-Debugging-Optimization.md",
+        "course-contents/15-Data-Analytics-Notebooks.md"
       ]
     },
     {
-      "section": "5. Copilot Chat & Context Mastery",
+      "section": "Appendices",
       "files": [
-        "0.1-course-contents/Copilot-Hash-Context.md",
-        "0.1-course-contents/Copilot-Workspace-Context.md",
-        "0.1-course-contents/Copilot-Chat-Participants.md",
-        "0.1-course-contents/Copilot-Chat-Models.md"
-      ]
-    },
-    {
-      "section": "6. Web Layer & Multi-File Edits",
-      "files": [
-        "0.1-course-contents/Copilot-Editing-Session.md",
-        "0.1-course-contents/Copilot-Custom-Chat-Modes.md",
-        "0.1-course-contents/Copilot-Prompt-Files.md"
-      ]
-    },
-    {
-      "section": "7. Efficiency & Advanced Usage",
-      "files": [
-        "0.1-course-contents/Copilot-Custom-Instructions.md",
-        "0.1-course-contents/Copilot-Limitations.md",
-        "0.1-course-contents/Copilot-Ethics-Security.md",
-        "0.1-course-contents/Copilot-Agents.md",
-        "0.1-course-contents/Copilot-Tool-Sets.md",
-        "0.1-course-contents/Copilot-Auto-Commit-Setup.md"
-      ]
-    },
-    {
-      "section": "8. Troubleshooting & Recovery",
-      "files": [
-        "0.1-course-contents/Disable-Copilot.md"
-      ]
-    },
-    {
-      "section": "9. Documentation & Reference",
-      "files": [
-        "0.1-course-contents/Copilot-Documentation-Generation.md",
-        "0.1-course-contents/VSCode-WorkSpace.md"
-      ]
-    },
-    {
-      "section": "License",
-      "files": [
-        "LICENSE.md"
+        "course-contents/A1-AI-Tools-Comparison.md",
+        "course-contents/A2-Power-Prompts.md",
+        "course-contents/IntelliJ/Capability-Comparison.md",
+        "course-contents/IntelliJ/Copilot-Shortcuts.md",
+        "course-contents/14-Copilot-Gym.md"
       ]
     },
     {
