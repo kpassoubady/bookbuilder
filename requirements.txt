@@ -8,7 +8,7 @@ markdown>=3.4.0
 weasyprint>=59.0
 
 # PDF manipulation (merging, reading)
-PyPDF2>=3.0.0
+pypdf>=4.0.0
 
 # PDF generation (TOC page)
 reportlab>=4.0.0

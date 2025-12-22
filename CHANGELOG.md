@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release of bookbuilder
 - CLI interface with `build` and `cleanup` commands
 - Markdown to PDF conversion using mdpdf
-- PDF combining functionality with PyPDF2
+- PDF combining functionality with pypdf
 - Support for nested chapter structures
 - Table of contents generation
 - Order file validation

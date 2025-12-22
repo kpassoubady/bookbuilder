@@ -116,10 +116,17 @@ def cmd_build(args):
             else:
                 config_path = os.path.join(root_dir, config_path)
     
+    # Resolve temp directory for intermediate files
+    temp_dir = None
+    if hasattr(args, 'temp') and args.temp:
+        temp_dir = os.path.abspath(args.temp)
+    
     if not args.quiet:
         print(f"Root directory: {root_dir}")
         print(f"Order file: {order_path}")
         print(f"Output directory: {output_dir}")
+        if temp_dir:
+            print(f"Temp directory: {temp_dir}")
         print(f"Output format: {output_format.value.upper()}")
         if config_path:
             print(f"Config file: {config_path}")
@@ -130,6 +137,7 @@ def cmd_build(args):
         output_filename=output_filename,
         root_dir=root_dir,
         output_dir=output_dir,
+        temp_dir=temp_dir,
         force=args.force if hasattr(args, 'force') else False,
         verbose=not args.quiet,
         config_path=config_path,
@@ -151,8 +159,9 @@ def cmd_build(args):
         print("=" * 60)
         print("✓ Build Complete!")
         print(f"✓ Output: {output_file}")
-        if os.path.exists(output_dir) and not args.cleanup:
-            print(f"✓ Intermediate files cached in: {output_dir}")
+        cache_dir = temp_dir if temp_dir else output_dir
+        if os.path.exists(cache_dir) and not args.cleanup:
+            print(f"✓ Intermediate files cached in: {cache_dir}")
             print("  (Use --cleanup to delete after build)")
         print("=" * 60)
     
@@ -284,6 +293,12 @@ Order JSON Format:
         '--config', '-C',
         type=str,
         help='Path to custom config file (overrides defaults)'
+    )
+    build_parser.add_argument(
+        '--temp', '-t',
+        type=str,
+        default=None,
+        help='Directory for intermediate files (converted PDFs). If not specified, uses --output-dir'
     )
     build_parser.set_defaults(func=cmd_build)
     
