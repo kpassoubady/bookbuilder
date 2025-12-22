@@ -273,3 +273,93 @@ def inject_document_anchor(html_content: str, anchor_id: str) -> str:
     """
     anchor_tag = f'<a id="{anchor_id}"></a>\n'
     return anchor_tag + html_content
+
+
+def process_details_tags(
+    md_content: str,
+    output_format: str,
+    settings: dict = None
+) -> str:
+    """
+    Process HTML <details> tags in markdown content based on output format.
+    
+    For static formats (PDF, DOCX), transforms <details> blocks into visible
+    static content. For interactive formats (EPUB, HTML), leaves them intact.
+    
+    Args:
+        md_content: Raw markdown content
+        output_format: Target output format ('pdf', 'docx', 'epub', 'html')
+        settings: Configuration dictionary with:
+            - staticFormats: list of formats to convert to static (default: ['pdf', 'docx'])
+            - interactiveFormats: list of formats to keep interactive (default: ['epub', 'html'])
+            - staticReplacement: dict with showSummary, summaryPrefix, addHorizontalRule
+            
+    Returns:
+        Processed markdown content
+    """
+    if settings is None:
+        settings = {}
+    
+    # Check if processing is enabled
+    if not settings.get('enabled', True):
+        return md_content
+    
+    # Determine if this format needs static conversion
+    static_formats = settings.get('staticFormats', ['pdf', 'docx'])
+    
+    # Normalize format string
+    fmt = output_format.lower().strip()
+    
+    # If not a static format, return content unchanged
+    if fmt not in static_formats:
+        return md_content
+    
+    # Get replacement settings
+    replacement = settings.get('staticReplacement', {})
+    show_summary = replacement.get('showSummary', True)
+    summary_prefix = replacement.get('summaryPrefix', '')
+    summary_text_override = replacement.get('summaryText', None)  # Override summary text
+    add_hr = replacement.get('addHorizontalRule', True)
+    
+    # Pattern to match <details>...<summary>...</summary>...content...</details>
+    # Uses DOTALL so . matches newlines
+    details_pattern = re.compile(
+        r'<details[^>]*>\s*'                    # Opening <details> tag
+        r'<summary[^>]*>(.*?)</summary>\s*'     # <summary>...</summary>
+        r'(.*?)'                                 # Content between summary and closing tag
+        r'</details>',                           # Closing </details> tag
+        re.DOTALL | re.IGNORECASE
+    )
+    
+    def replace_details(match):
+        summary_html = match.group(1).strip()
+        content = match.group(2).strip()
+        
+        # Strip HTML tags from summary to get plain text
+        summary_text = re.sub(r'<[^>]+>', '', summary_html).strip()
+        
+        # Use override text if provided
+        if summary_text_override:
+            summary_text = summary_text_override
+        
+        # Build replacement
+        parts = []
+        
+        # Add horizontal rule before if configured
+        if add_hr:
+            parts.append('\n---\n')
+        
+        # Add summary as heading if configured
+        if show_summary and summary_text:
+            parts.append(f'{summary_prefix}**{summary_text}**\n')
+        
+        # Add the content
+        parts.append(content)
+        
+        # Add trailing newline for clean separation
+        parts.append('\n')
+        
+        return ''.join(parts)
+    
+    return details_pattern.sub(replace_details, md_content)
+

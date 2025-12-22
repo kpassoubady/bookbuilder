@@ -42,5 +42,24 @@
     "outputFilename": "book.pdf",
     "outputDirName": "bookbuilder-output",
     "tocFilename": "_toc.pdf"
+  },
+  "contentProcessing": {
+    "detailsTagHandling": {
+      "enabled": true,
+      "staticFormats": [
+        "pdf",
+        "docx"
+      ],
+      "interactiveFormats": [
+        "epub",
+        "html"
+      ],
+      "staticReplacement": {
+        "showSummary": true,
+        "summaryPrefix": "",
+        "summaryText": "Answers",
+        "addHorizontalRule": true
+      }
+    }
   }
 }

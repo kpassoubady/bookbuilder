@@ -431,6 +431,7 @@ def build_book(
     # Get style and TOC settings from config
     style_settings = config.get('styleSettings', {})
     toc_settings = config.get('tocSettings', {})
+    content_settings = config.get('contentProcessing', {})
     
     # Get output filename from JSON if not provided via CLI
     if output_filename is None:
@@ -535,7 +536,8 @@ def build_book(
                 title=book_title,
                 author=author,
                 toc=True,
-                verbose=verbose
+                verbose=verbose,
+                content_settings=content_settings
             )
         elif output_format == OutputFormat.HTML:
             result_path, success, error = build_book_html(
@@ -574,7 +576,8 @@ def build_book(
             verbose,
             page_settings=page_settings,
             style_settings=style_settings,
-            anchor_map=anchor_map
+            anchor_map=anchor_map,
+            content_settings=content_settings
         )
         
         if verbose:
