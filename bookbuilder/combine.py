@@ -431,7 +431,11 @@ def build_book(
     # Get style and TOC settings from config
     style_settings = config.get('styleSettings', {})
     toc_settings = config.get('tocSettings', {})
-    content_settings = config.get('contentProcessing', {})
+    # Get content processing settings: merge config defaults with order JSON overrides
+    content_settings = deep_merge(
+        config.get('contentProcessing', {}),
+        order_json.get('contentProcessing', {})
+    )
     
     # Get output filename from JSON if not provided via CLI
     if output_filename is None:
