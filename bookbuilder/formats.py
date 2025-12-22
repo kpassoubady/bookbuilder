@@ -14,10 +14,12 @@ For Amazon KDP:
 
 import os
 import subprocess
+import tempfile
+import shutil
 from enum import Enum
 from typing import Optional
 
-from .utils import ensure_dir
+from .utils import ensure_dir, process_details_tags
 
 
 class OutputFormat(Enum):
@@ -284,7 +286,8 @@ def build_book_docx(
     author: str = None,
     toc: bool = True,
     reference_doc: str = None,
-    verbose: bool = True
+    verbose: bool = True,
+    content_settings: dict = None
 ) -> tuple[str, bool, Optional[str]]:
     """
     Build a DOCX document from markdown files.
@@ -317,16 +320,43 @@ def build_book_docx(
     # Get all directories containing source files for image resolution
     resource_paths = get_resource_paths(md_files)
     
-    result = convert_with_pandoc(
-        md_files,
-        output_path,
-        'docx',
-        title=title,
-        toc=toc,
-        metadata=metadata,
-        extra_args=extra_args if extra_args else None,
-        resource_paths=resource_paths
-    )
+    # Preprocess files for DOCX (static format) - handle details tags
+    details_settings = (content_settings or {}).get('detailsTagHandling', {})
+    files_to_convert = md_files
+    temp_dir = None
+    
+    if details_settings.get('enabled', False):
+        # Check if DOCX is in static formats
+        static_formats = details_settings.get('staticFormats', ['pdf', 'docx'])
+        if 'docx' in static_formats:
+            # Create temp copies with processed content
+            temp_dir = tempfile.mkdtemp(prefix='bookbuilder_docx_')
+            files_to_convert = []
+            for md_file in md_files:
+                if os.path.exists(md_file):
+                    with open(md_file, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    processed = process_details_tags(content, 'docx', details_settings)
+                    temp_file = os.path.join(temp_dir, os.path.basename(md_file))
+                    with open(temp_file, 'w', encoding='utf-8') as f:
+                        f.write(processed)
+                    files_to_convert.append(temp_file)
+    
+    try:
+        result = convert_with_pandoc(
+            files_to_convert,
+            output_path,
+            'docx',
+            title=title,
+            toc=toc,
+            metadata=metadata,
+            extra_args=extra_args if extra_args else None,
+            resource_paths=resource_paths
+        )
+    finally:
+        # Clean up temp directory if created
+        if temp_dir and os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
     
     if verbose and result[1]:
         print(f"  ✓ DOCX created: {output_path}")
