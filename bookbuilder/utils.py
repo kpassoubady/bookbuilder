@@ -9,12 +9,13 @@ import os
 import re
 import json
 import fnmatch
+from importlib import resources
 from urllib.parse import unquote
 
 
 def get_default_config_path() -> str:
     """Get the path to the default config file bundled with the package."""
-    return os.path.join(os.path.dirname(__file__), 'default-config.json')
+    return str(resources.files('bookbuilder.resources').joinpath('default-config.json'))
 
 
 def load_config(config_path: str = None) -> dict:
