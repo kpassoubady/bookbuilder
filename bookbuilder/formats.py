@@ -300,6 +300,7 @@ def build_book_docx(
         toc: Include table of contents
         reference_doc: Path to reference DOCX for styling
         verbose: Print progress messages
+        content_settings: Content processing settings (e.g., details tag handling)
         
     Returns:
         Tuple of (output_path, success, error_message)
