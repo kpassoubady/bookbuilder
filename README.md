@@ -33,7 +33,7 @@ pip install -e .
 ### Dependencies
 
 ```bash
-pip install markdown weasyprint PyPDF2 reportlab
+pip install markdown weasyprint pypdf reportlab
 ```
 
 ## Quick Start

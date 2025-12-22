@@ -21,7 +21,7 @@ Thank you for your interest in contributing to bookbuilder! This document provid
 
 - Python 3.8 or higher
 - mdpdf (for Markdown to PDF conversion)
-- PyPDF2 (for PDF manipulation)
+- pypdf (for PDF manipulation)
 
 ### Running Locally
 

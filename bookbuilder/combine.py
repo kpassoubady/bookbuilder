@@ -12,7 +12,7 @@ import os
 import gc
 import json
 import datetime
-from PyPDF2 import PdfMerger, PdfReader
+from pypdf import PdfWriter, PdfReader
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
@@ -299,14 +299,14 @@ def combine_pdfs_with_bookmarks(
         front_cover: Path to front cover PDF (optional)
         back_cover: Path to back cover PDF (optional)
     """
-    merger = PdfMerger()
+    writer = PdfWriter()
     current_page = 0
     
     try:
         # Add front cover first
         if front_cover and os.path.isfile(front_cover):
             try:
-                merger.append(front_cover)
+                writer.append(front_cover)
                 front_cover_pages = safe_get_page_count(front_cover)
                 current_page += front_cover_pages
                 print(f"Added front cover ({front_cover_pages} pages)")
@@ -315,7 +315,7 @@ def combine_pdfs_with_bookmarks(
         
         # Add TOC
         try:
-            merger.append(toc_pdf)
+            writer.append(toc_pdf)
             toc_pages = safe_get_page_count(toc_pdf)
             current_page += toc_pages
             print(f"Added TOC ({toc_pages} pages)")
@@ -326,14 +326,14 @@ def combine_pdfs_with_bookmarks(
         pdf_index = 0
         
         for chapter in chapter_info:
-            merger.add_outline_item(chapter['section'], current_page)
+            writer.add_outline_item(chapter['section'], current_page)
             
             for _ in range(chapter['files']):
                 if pdf_index < len(pdf_list):
                     pdf = pdf_list[pdf_index]
                     try:
                         page_count = safe_get_page_count(pdf)
-                        merger.append(pdf)
+                        writer.append(pdf)
                         current_page += page_count
                     except Exception as e:
                         print(f"  Warning: Could not add {os.path.basename(pdf)}: {e}")
@@ -345,15 +345,15 @@ def combine_pdfs_with_bookmarks(
         # Add back cover last
         if back_cover and os.path.isfile(back_cover):
             try:
-                merger.append(back_cover)
+                writer.append(back_cover)
                 back_cover_pages = safe_get_page_count(back_cover)
                 print(f"Added back cover ({back_cover_pages} pages)")
             except Exception as e:
                 print(f"  Warning: Could not add back cover: {e}")
         
-        merger.write(output_pdf)
+        writer.write(output_pdf)
     finally:
-        merger.close()
+        writer.close()
         gc.collect()
 
 
@@ -362,6 +362,7 @@ def build_book(
     output_filename: str = None,
     root_dir: str = None,
     output_dir: str = None,
+    temp_dir: str = None,
     force: bool = False,
     verbose: bool = True,
     config_path: str = None,
@@ -377,7 +378,8 @@ def build_book(
         order_json_path: Path to order JSON file (required)
         output_filename: Output filename for the book (optional, can be in JSON)
         root_dir: Project root directory (defaults to current directory)
-        output_dir: Output directory for converted PDFs (defaults to <root>/bookbuilder-output)
+        output_dir: Output directory for final book (defaults to <root>/bookbuilder-output)
+        temp_dir: Directory for intermediate files (converted PDFs). If None, uses output_dir
         force: Force reconversion of all MD files
         verbose: Print progress messages
         config_path: Path to custom config file (optional)
@@ -397,6 +399,12 @@ def build_book(
     if output_dir is None:
         output_dir = get_default_output_dir(root_dir)
     output_dir = os.path.abspath(output_dir)
+    
+    # Set temp_dir for intermediate files (defaults to output_dir if not specified)
+    if temp_dir is None:
+        temp_dir = output_dir
+    else:
+        temp_dir = os.path.abspath(temp_dir)
     
     # Resolve order JSON path
     if not os.path.isabs(order_json_path):
@@ -566,7 +574,7 @@ def build_book(
         
         return output_file
     
-    # PDF format: use existing WeasyPrint + PyPDF2 workflow
+    # PDF format: use existing WeasyPrint + pypdf workflow
     # Convert all MD files in parallel (lazy - only if needed)
     if all_files_to_convert:
         if verbose:
@@ -575,7 +583,7 @@ def build_book(
         pdf_paths, converted_count, failed_count = convert_files_parallel(
             all_files_to_convert,
             root_dir,
-            output_dir,
+            temp_dir,
             force,
             verbose,
             page_settings=page_settings,
@@ -599,7 +607,7 @@ def build_book(
     
     # Process front cover
     for f in front_cover_files:
-        pdf_path, _, _ = get_pdf_for_file(f, root_dir, output_dir, force, False)
+        pdf_path, _, _ = get_pdf_for_file(f, root_dir, temp_dir, force, False)
         if pdf_path and os.path.exists(pdf_path):
             front_cover = pdf_path
             if verbose:
@@ -612,7 +620,7 @@ def build_book(
         chapter_pdfs = []
         
         for f in files:
-            pdf_path, _, error = get_pdf_for_file(f, root_dir, output_dir, force, False)
+            pdf_path, _, error = get_pdf_for_file(f, root_dir, temp_dir, force, False)
             if pdf_path and os.path.exists(pdf_path):
                 chapter_pdfs.append(pdf_path)
             elif verbose and error:
@@ -628,7 +636,7 @@ def build_book(
     
     # Process back cover
     for f in back_cover_files:
-        pdf_path, _, _ = get_pdf_for_file(f, root_dir, output_dir, force, False)
+        pdf_path, _, _ = get_pdf_for_file(f, root_dir, temp_dir, force, False)
         if pdf_path and os.path.exists(pdf_path):
             back_cover = pdf_path
             if verbose:
@@ -645,7 +653,7 @@ def build_book(
     
     # Create TOC page
     toc_filename = defaults.get('tocFilename', '_toc.pdf')
-    toc_pdf = os.path.join(output_dir, toc_filename)
+    toc_pdf = os.path.join(temp_dir, toc_filename)
     create_toc_page(chapter_info, book_title, toc_pdf, toc_settings, page_settings)
     
     if verbose:
