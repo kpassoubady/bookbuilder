@@ -141,7 +141,11 @@ def get_pdf_for_file(
     root_dir: str,
     output_dir: str,
     force: bool = False,
-    verbose: bool = False
+    verbose: bool = False,
+    page_settings: dict = None,
+    style_settings: dict = None,
+    anchor_map: dict = None,
+    content_settings: dict = None
 ) -> tuple[str, bool, str]:
     """
     Get or create a PDF for a file (MD or PDF).
@@ -152,6 +156,10 @@ def get_pdf_for_file(
         output_dir: Output directory for converted PDFs
         force: Force reconversion
         verbose: Print progress
+        page_settings: Header/footer configuration for PDF conversion
+        style_settings: Styling configuration for PDF conversion
+        anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
+        content_settings: Content processing settings (e.g., details tag handling)
         
     Returns:
         Tuple of (pdf_path, was_converted, error_message)
@@ -164,7 +172,13 @@ def get_pdf_for_file(
     
     if file_path.lower().endswith('.md'):
         # Convert MD to PDF
-        return convert_file(file_path, root_dir, output_dir, force, verbose)
+        return convert_file(
+            file_path, root_dir, output_dir, force, verbose,
+            page_settings=page_settings,
+            style_settings=style_settings,
+            anchor_map=anchor_map,
+            content_settings=content_settings
+        )
     
     return None, False, f"Unsupported file type: {file_path}"
 
@@ -607,7 +621,13 @@ def build_book(
     
     # Process front cover
     for f in front_cover_files:
-        pdf_path, _, _ = get_pdf_for_file(f, root_dir, temp_dir, force, False)
+        pdf_path, _, _ = get_pdf_for_file(
+            f, root_dir, temp_dir, force, False,
+            page_settings=page_settings,
+            style_settings=style_settings,
+            anchor_map=anchor_map,
+            content_settings=content_settings
+        )
         if pdf_path and os.path.exists(pdf_path):
             front_cover = pdf_path
             if verbose:
@@ -620,7 +640,13 @@ def build_book(
         chapter_pdfs = []
         
         for f in files:
-            pdf_path, _, error = get_pdf_for_file(f, root_dir, temp_dir, force, False)
+            pdf_path, _, error = get_pdf_for_file(
+                f, root_dir, temp_dir, force, False,
+                page_settings=page_settings,
+                style_settings=style_settings,
+                anchor_map=anchor_map,
+                content_settings=content_settings
+            )
             if pdf_path and os.path.exists(pdf_path):
                 chapter_pdfs.append(pdf_path)
             elif verbose and error:
@@ -636,7 +662,13 @@ def build_book(
     
     # Process back cover
     for f in back_cover_files:
-        pdf_path, _, _ = get_pdf_for_file(f, root_dir, temp_dir, force, False)
+        pdf_path, _, _ = get_pdf_for_file(
+            f, root_dir, temp_dir, force, False,
+            page_settings=page_settings,
+            style_settings=style_settings,
+            anchor_map=anchor_map,
+            content_settings=content_settings
+        )
         if pdf_path and os.path.exists(pdf_path):
             back_cover = pdf_path
             if verbose:
