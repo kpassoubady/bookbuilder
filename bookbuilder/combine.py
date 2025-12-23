@@ -179,7 +179,8 @@ def get_pdf_for_file(
             page_settings=page_settings,
             style_settings=style_settings,
             anchor_map=anchor_map,
-            content_settings=content_settings
+            content_settings=content_settings,
+            full_bleed=full_bleed
         )
     
     return None, False, f"Unsupported file type: {file_path}"
@@ -490,10 +491,11 @@ def build_book(
         else:
             chapter_data.append((section_name, files))
         
-        # Collect MD files for batch conversion
-        for f in files:
-            if f.lower().endswith('.md'):
-                all_files_to_convert.append(f)
+        # Collect MD files for batch conversion (exclude covers as they need special processing)
+        if section_name not in ["Front Cover", "Back Cover"]:
+            for f in files:
+                if f.lower().endswith('.md'):
+                    all_files_to_convert.append(f)
     
     if verbose:
         total_files = sum(len(files) for _, files in chapter_data)
@@ -623,8 +625,9 @@ def build_book(
     
     # Process front cover
     for f in front_cover_files:
+        # Always force re-conversion for covers ensuring full-bleed settings are applied
         pdf_path, _, _ = get_pdf_for_file(
-            f, root_dir, temp_dir, force, False,
+            f, root_dir, temp_dir, True, False,
             page_settings=page_settings,
             style_settings=style_settings,
             anchor_map=anchor_map,
@@ -665,8 +668,9 @@ def build_book(
     
     # Process back cover
     for f in back_cover_files:
+        # Always force re-conversion for covers ensuring full-bleed settings are applied
         pdf_path, _, _ = get_pdf_for_file(
-            f, root_dir, temp_dir, force, False,
+            f, root_dir, temp_dir, True, False,
             page_settings=page_settings,
             style_settings=style_settings,
             anchor_map=anchor_map,
