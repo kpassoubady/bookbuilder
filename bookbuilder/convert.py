@@ -326,12 +326,17 @@ def convert_markdown_to_pdf(
     footer_font_size = styles.get('footerFontSize', '10px')
 
     # Handle full bleed (no margins, no headers/footers)
+    full_bleed_css = ""
     actual_margins = '0' if full_bleed else margins
     if full_bleed:
         header_css = 'none'
         footer_left_css = 'none'
         footer_center_css = 'none'
         footer_right_css = 'none'
+        full_bleed_css = """
+            body, p { margin: 0; padding: 0; }
+            img { width: 100vw; height: 100vh; object-fit: cover; display: block; }
+        """
     
     html_content = markdown.markdown(
         md_content, 
@@ -371,6 +376,8 @@ def convert_markdown_to_pdf(
                     font-family: "{font_family}";
                 }}
             }}
+            
+            {full_bleed_css}
             
             /* Base font for all text */
             body {{
