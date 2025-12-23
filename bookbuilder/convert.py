@@ -227,7 +227,8 @@ def convert_markdown_to_pdf(
     style_settings: dict = None,
     force: bool = False,
     anchor_map: dict = None,
-    content_settings: dict = None
+    content_settings: dict = None,
+    full_bleed: bool = False
 ) -> tuple[str, bool]:
     """
     Convert a markdown file to PDF with dynamic header and footer.
@@ -247,6 +248,8 @@ def convert_markdown_to_pdf(
             - pageSize, margins, fonts, colors, sizes, etc.
         force: Force reconversion even if cached
         anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
+        content_settings: Content processing settings
+        full_bleed: If True, set margins to 0 and disable headers/footers
         
     Returns:
         Tuple of (pdf_path, was_converted) - was_converted is False if cached
@@ -302,16 +305,7 @@ def convert_markdown_to_pdf(
     footer_center_css = build_css_content(footer_center)
     footer_right_css = build_css_content(footer_right)
     
-    html_content = markdown.markdown(
-        md_content, 
-        extensions=['extra', 'toc', 'tables']
-    )
-    
-    # Inject document anchor for internal linking
-    doc_anchor = filename_to_anchor(os.path.basename(md_path))
-    html_content = inject_document_anchor(html_content, doc_anchor)
-    
-    # Get style values with defaults
+    # Get style values with defaults (moved up for full_bleed logic)
     page_size = styles.get('pageSize', 'A4')
     margins = styles.get('margins', '1in 0.8in 1in 0.8in')
     font_family = styles.get('fontFamily', 'Helvetica Neue, Helvetica, Arial, sans-serif')
@@ -330,6 +324,23 @@ def convert_markdown_to_pdf(
     link_color = styles.get('linkColor', '#0066cc')
     header_font_size = styles.get('headerFontSize', '14px')
     footer_font_size = styles.get('footerFontSize', '10px')
+
+    # Handle full bleed (no margins, no headers/footers)
+    actual_margins = '0' if full_bleed else margins
+    if full_bleed:
+        header_css = 'none'
+        footer_left_css = 'none'
+        footer_center_css = 'none'
+        footer_right_css = 'none'
+    
+    html_content = markdown.markdown(
+        md_content, 
+        extensions=['extra', 'toc', 'tables']
+    )
+    
+    # Inject document anchor for internal linking
+    doc_anchor = filename_to_anchor(os.path.basename(md_path))
+    html_content = inject_document_anchor(html_content, doc_anchor)
     
     html_template = f'''
     <html>
@@ -337,7 +348,7 @@ def convert_markdown_to_pdf(
         <style>
             @page {{
                 size: {page_size};
-                margin: {margins};
+                margin: {actual_margins};
                 @top-center {{
                     content: {header_css};
                     font-size: {header_font_size};
@@ -490,7 +501,8 @@ def convert_file(
     page_settings: dict = None,
     style_settings: dict = None,
     anchor_map: dict = None,
-    content_settings: dict = None
+    content_settings: dict = None,
+    full_bleed: bool = False
 ) -> tuple[str, bool, str]:
     """
     Convert a single file (MD or PDF) and return the PDF path.
@@ -504,9 +516,9 @@ def convert_file(
         output_dir: Output directory for converted PDFs
         force: Force reconversion
         verbose: Print progress
-        page_settings: Header/footer configuration for PDF conversion
-        style_settings: Styling configuration for PDF conversion
         anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
+        content_settings: Content processing settings
+        full_bleed: If True, use full-bleed mode for PDF conversion
         
     Returns:
         Tuple of (pdf_path, was_converted, error_message)
@@ -534,7 +546,8 @@ def convert_file(
             pdf_path, was_converted = convert_markdown_to_pdf(
                 file_path, pdf_path, page_settings=page_settings, 
                 style_settings=style_settings, force=force,
-                anchor_map=anchor_map, content_settings=content_settings
+                anchor_map=anchor_map, content_settings=content_settings,
+                full_bleed=full_bleed
             )
             
             if verbose and was_converted:

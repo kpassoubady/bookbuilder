@@ -145,7 +145,8 @@ def get_pdf_for_file(
     page_settings: dict = None,
     style_settings: dict = None,
     anchor_map: dict = None,
-    content_settings: dict = None
+    content_settings: dict = None,
+    full_bleed: bool = False
 ) -> tuple[str, bool, str]:
     """
     Get or create a PDF for a file (MD or PDF).
@@ -160,6 +161,7 @@ def get_pdf_for_file(
         style_settings: Styling configuration for PDF conversion
         anchor_map: Dictionary mapping filenames to anchor IDs for internal linking
         content_settings: Content processing settings (e.g., details tag handling)
+        full_bleed: If True, use full-bleed mode for PDF conversion
         
     Returns:
         Tuple of (pdf_path, was_converted, error_message)
@@ -626,7 +628,8 @@ def build_book(
             page_settings=page_settings,
             style_settings=style_settings,
             anchor_map=anchor_map,
-            content_settings=content_settings
+            content_settings=content_settings,
+            full_bleed=True
         )
         if pdf_path and os.path.exists(pdf_path):
             front_cover = pdf_path
@@ -667,7 +670,8 @@ def build_book(
             page_settings=page_settings,
             style_settings=style_settings,
             anchor_map=anchor_map,
-            content_settings=content_settings
+            content_settings=content_settings,
+            full_bleed=True
         )
         if pdf_path and os.path.exists(pdf_path):
             back_cover = pdf_path
